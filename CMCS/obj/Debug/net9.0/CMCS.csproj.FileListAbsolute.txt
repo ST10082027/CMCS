@@ -224,3 +224,4 @@
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.pdb
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.genruntimeconfig.cache
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/ref/CMCS.dll
+/Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.sourcelink.json

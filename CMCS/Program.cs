@@ -43,10 +43,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
-app.UseAuthentication();   // BEFORE UseAuthorization
+app.UseAuthentication();   // always use BEFORE UseAuthorization
 app.UseAuthorization();
-
 app.MapStaticAssets();
 app.MapControllerRoute(
     name: "default",
