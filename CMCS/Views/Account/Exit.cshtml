@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Exit";
+}
+<div class="container mt-5" style="max-width: 640px;">
+    <h2 class="mb-3">Exit Application</h2>
+    <p>This is a web application, so most browsers block tabs from closing themselves unless they were opened by a
+        script.</p>
+    <p>If this tab doesn’t close automatically, please close it manually.</p>
+</div>
+<script>
+    // Best effort (usually blocked unless script-opened)
+    window.close();
+</script>

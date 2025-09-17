@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Manager Dashboard";
+}
+<div class="container py-4">
+    <h2 class="mb-4">Manager</h2>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Review Claims</h5>
+                    <p class="card-text">Filter by IC, period, status.</p>
+                    <a class="btn btn-primary" asp-action="ReviewClaims">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Approve / Reject</h5>
+                    <p class="card-text">Bulk actions, comments, audit trail.</p>
+                    <a class="btn btn-primary" asp-action="ApproveReject">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Team Overview</h5>
+                    <p class="card-text">IC capacity, SLA, pending approvals.</p>
+                    <a class="btn btn-primary" asp-action="TeamOverview">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Reports</h5>
+                    <p class="card-text">Monthly totals, variances, export CSV/PDF.</p>
+                    <a class="btn btn-primary" asp-action="Reports">Open</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

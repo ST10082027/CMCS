@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Corporate Dashboard";
+}
+<div class="container py-4">
+    <h2 class="mb-4">Corporate</h2>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Org Settings</h5>
+                    <p class="card-text">Rates, periods, claim rules, templates.</p>
+                    <a class="btn btn-primary" asp-action="OrgSettings">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">User & Role Mgmt</h5>
+                    <p class="card-text">Create users, assign IC/MR/CO.</p>
+                    <a class="btn btn-primary" asp-action="UserRoleManagement">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Finance Reports</h5>
+                    <p class="card-text">Consolidated spend, budgeting, exports.</p>
+                    <a class="btn btn-primary" asp-action="FinanceReports">Open</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Audit Log</h5>
+                    <p class="card-text">Who did what, when; approvals trail.</p>
+                    <a class="btn btn-primary" asp-action="AuditLog">Open</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
