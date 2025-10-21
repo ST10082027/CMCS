@@ -36,7 +36,6 @@
                     }
                     else
                     {
-                        <!-- fallback if authenticated but no role -->
                         <a class="navbar-brand" asp-controller="Home" asp-action="Index">CMCS</a>
                     }
                 }
@@ -54,10 +53,14 @@
                     @if (User?.Identity?.IsAuthenticated ?? false)
                     {
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <!-- Dashboards -->
                             @if (User.IsInRole("IC"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="ICDashboard" asp-action="Index">IC Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Claims" asp-action="My">My Claims</a>
                                 </li>
                             }
                             @if (User.IsInRole("MR"))
@@ -65,13 +68,23 @@
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="MRDashboard" asp-action="Index">MR Dashboard</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Claims" asp-action="ReviewQueue">Review Queue</a>
+                                </li>
                             }
                             @if (User.IsInRole("CO"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="CODashboard" asp-action="Index">CO Dashboard</a>
+                                    <a class="nav-link" asp-controller="CODashboard" asp-action="Index">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="CorporateUsers" asp-action="Index">User Management</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Claims" asp-action="All">Review Claims</a>
                                 </li>
                             }
+
                         </ul>
 
                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex">

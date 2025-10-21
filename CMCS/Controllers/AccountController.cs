@@ -32,7 +32,7 @@ namespace CMCS.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            // Identity login uses the username; allow email-as-username
+            // Support username == email for convenience
             var user = await _userManager.FindByNameAsync(model.Username)
                        ?? await _userManager.FindByEmailAsync(model.Username);
 
@@ -42,28 +42,41 @@ namespace CMCS.Controllers
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password,
-                                                                  isPersistent: false, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(
+                user.UserName!,
+                model.Password,
+                isPersistent: false,
+                lockoutOnFailure: false
+            );
+
             if (!result.Succeeded)
             {
                 ModelState.AddModelError(string.Empty, "Invalid username or password.");
                 return View(model);
             }
 
-            // Redirect by role
-            var roles = await _userManager.GetRolesAsync(user);
-            var role = roles.FirstOrDefault();
-
+            // If a local returnUrl was provided, prefer it
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-
-            return role switch
             {
-                "IC" => RedirectToAction("Index", "ICDashboard"),
-                "MR" => RedirectToAction("Index", "MRDashboard"),
-                "CO" => RedirectToAction("Index", "CODashboard"),
-                _ => RedirectToAction("Index", "Dashboard")
-            };
+                return Redirect(returnUrl);
+            }
+
+            // Role-based landing pages (aligns with existing controllers)
+            if (await _userManager.IsInRoleAsync(user, "IC"))
+            {
+                return RedirectToAction("My", "Claims");
+            }
+            if (await _userManager.IsInRoleAsync(user, "MR"))
+            {
+                return RedirectToAction("ReviewQueue", "Claims");
+            }
+            if (await _userManager.IsInRoleAsync(user, "CO"))
+            {
+                return RedirectToAction("All", "Claims");
+            }
+
+            // Fallback
+            return RedirectToAction("Index", "Dashboard");
         }
 
         [HttpPost]
@@ -72,7 +85,7 @@ namespace CMCS.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("Login");
+            return RedirectToAction(nameof(Login));
         }
 
         [HttpGet]

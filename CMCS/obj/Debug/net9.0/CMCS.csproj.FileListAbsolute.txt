@@ -142,6 +142,7 @@
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.MvcApplicationPartsAssemblyInfo.cache
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.RazorAssemblyInfo.cache
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.RazorAssemblyInfo.cs
+/Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.sourcelink.json
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/scopedcss/Views/Shared/_Layout.cshtml.rz.scp.css
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/scopedcss/bundle/CMCS.styles.css
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/scopedcss/projectbundle/CMCS.bundle.scp.css
@@ -224,4 +225,3 @@
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.pdb
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.genruntimeconfig.cache
 /Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/ref/CMCS.dll
-/Users/johnhoffmanprinsloo/CMCS/CMCS/obj/Debug/net9.0/CMCS.sourcelink.json

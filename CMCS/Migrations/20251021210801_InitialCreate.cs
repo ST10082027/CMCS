@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CMCS.Migrations
 {
     /// <inheritdoc />
-    public partial class InitIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,6 +30,9 @@ namespace CMCS.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
+                    FirstName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    HourlyRate = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -156,6 +159,31 @@ namespace CMCS.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "MonthlyClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    IcUserId = table.Column<string>(type: "TEXT", nullable: false),
+                    MonthKey = table.Column<string>(type: "TEXT", nullable: false),
+                    Hours = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Rate = table.Column<decimal>(type: "TEXT", nullable: false),
+                    SubmittedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    ManagerRemark = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MonthlyClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MonthlyClaims_AspNetUsers_IcUserId",
+                        column: x => x.IcUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -192,6 +220,11 @@ namespace CMCS.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MonthlyClaims_IcUserId",
+                table: "MonthlyClaims",
+                column: "IcUserId");
         }
 
         /// <inheritdoc />
@@ -211,6 +244,9 @@ namespace CMCS.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "MonthlyClaims");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

@@ -1,0 +1,27 @@
+@model decimal
+@{
+    ViewData["Title"] = "Edit Hourly Rate";
+    var email = ViewBag.Email as string;
+    var userId = ViewBag.UserId as string;
+}
+<div class="container py-4" style="max-width: 520px;">
+    <h3 class="mb-3">Edit Hourly Rate</h3>
+    <div class="mb-2 text-muted">
+        <div><strong>User:</strong> @email</div>
+        <div><strong>User ID:</strong> @userId</div>
+    </div>
+
+    <form asp-action="EditRate" method="post">
+        <input type="hidden" name="id" value="@userId" />
+        <div class="mb-3">
+            <label class="form-label">Hourly Rate (R/hr)</label>
+            <input class="form-control" name="hourlyRate" value="@Model.ToString("0.00")" />
+            <div class="form-text">Enter a non-negative value.</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </form>
+</div>

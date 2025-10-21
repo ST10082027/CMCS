@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Identity; // Data/SeedIdentity.cs
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace CMCS.Data
 {
@@ -7,69 +8,73 @@ namespace CMCS.Data
     {
         private static readonly string[] Roles = new[] { "IC", "MR", "CO" };
 
+        // Demo users
+        private static readonly (string Email, string Role, string First, string Last)[] Users =
+        {
+            ("ic@example.com", "IC", "Ivy", "Contractor"),
+            ("mr@example.com", "MR", "Mandla", "Reviewer"),
+            ("co@example.com", "CO", "Cora", "Officer"),
+        };
+
+        private const string DefaultPassword = "P@ssw0rd!";
+
         public static async Task InitializeAsync(IServiceProvider services, ILogger logger = null!)
         {
             var roleMgr = services.GetRequiredService<RoleManager<IdentityRole>>();
             var userMgr = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-            // Create roles
+            // Roles
             foreach (var r in Roles)
             {
                 if (!await roleMgr.RoleExistsAsync(r))
                 {
-                    var roleResult = await roleMgr.CreateAsync(new IdentityRole(r));
-                    if (!roleResult.Succeeded)
+                    var created = await roleMgr.CreateAsync(new IdentityRole(r));
+                    if (!created.Succeeded)
                     {
-                        var msg = $"Seeding role '{r}' failed: {string.Join("; ", roleResult.Errors.Select(e => e.Description))}";
+                        var msg = $"Failed creating role '{r}': {string.Join("; ", created.Errors.Select(e => e.Description))}";
                         logger?.LogError(msg);
                         throw new Exception(msg);
                     }
-                    logger?.LogInformation("Seeded role {Role}", r);
+                    logger?.LogInformation("Created role {Role}", r);
                 }
             }
 
-            // Seed users
-            await EnsureUserAsync(userMgr, logger, "ic@example.com", "P@ssw0rd!", "IC");
-            await EnsureUserAsync(userMgr, logger, "mr@example.com", "P@ssw0rd!", "MR");
-            await EnsureUserAsync(userMgr, logger, "co@example.com", "P@ssw0rd!", "CO");
-        }
-
-        private static async Task EnsureUserAsync(
-            UserManager<ApplicationUser> userMgr,
-            ILogger logger,
-            string email,
-            string password,
-            string role)
-        {
-            var user = await userMgr.FindByEmailAsync(email);
-            if (user == null)
+            // Users
+            foreach (var (email, role, first, last) in Users)
             {
-                user = new ApplicationUser
+                var user = await userMgr.FindByEmailAsync(email);
+                if (user == null)
                 {
-                    UserName = email,
-                    Email = email,
-                    EmailConfirmed = true
-                };
-                var create = await userMgr.CreateAsync(user, password);
-                if (!create.Succeeded)
-                {
-                    var msg = $"Seeding user '{email}' failed: {string.Join("; ", create.Errors.Select(e => e.Description))}";
-                    logger?.LogError(msg);
-                    throw new Exception(msg);
-                }
-                logger?.LogInformation("Seeded user {Email}", email);
-            }
+                    user = new ApplicationUser
+                    {
+                        UserName = email,
+                        Email = email,
+                        EmailConfirmed = true,
+                        FirstName = first,
+                        LastName = last
+                    };
 
-            if (!await userMgr.IsInRoleAsync(user, role))
-            {
-                var addRole = await userMgr.AddToRoleAsync(user, role);
-                if (!addRole.Succeeded)
-                {
-                    var msg = $"Adding user '{email}' to role '{role}' failed: {string.Join("; ", addRole.Errors.Select(e => e.Description))}";
-                    logger?.LogError(msg);
-                    throw new Exception(msg);
+                    var created = await userMgr.CreateAsync(user, DefaultPassword);
+                    if (!created.Succeeded)
+                    {
+                        var msg = $"Failed creating user '{email}': {string.Join("; ", created.Errors.Select(e => e.Description))}";
+                        logger?.LogError(msg);
+                        throw new Exception(msg);
+                    }
+                    logger?.LogInformation("Created user {Email}", email);
                 }
-                logger?.LogInformation("Added user {Email} to role {Role}", email, role);
+
+                if (!await userMgr.IsInRoleAsync(user, role))
+                {
+                    var addRole = await userMgr.AddToRoleAsync(user, role);
+                    if (!addRole.Succeeded)
+                    {
+                        var msg = $"Failed adding user '{email}' to role '{role}': {string.Join("; ", addRole.Errors.Select(e => e.Description))}";
+                        logger?.LogError(msg);
+                        throw new Exception(msg);
+                    }
+                    logger?.LogInformation("Added user {Email} to role {Role}", email, role);
+                }
             }
         }
     }

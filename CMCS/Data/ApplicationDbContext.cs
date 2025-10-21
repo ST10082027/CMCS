@@ -11,5 +11,6 @@ namespace CMCS.Data
 
         // Add DbSet<T> here later, e.g.:
         // public DbSet<MonthlyClaim> MonthlyClaims { get; set; } = default!;
+        public DbSet<CMCS.Models.MonthlyClaim> MonthlyClaims { get; set; } = default!;
     }
 }

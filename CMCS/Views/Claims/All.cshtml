@@ -1,0 +1,35 @@
+@model IEnumerable<CMCS.Models.MonthlyClaim>
+@{
+    ViewData["Title"] = "All Claims";
+}
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>IC</th>
+            <th>Month</th>
+            <th>Hours</th>
+            <th>Rate</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th>Remark</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.IcUser?.Email</td>
+                <td>@c.MonthKey</td>
+                <td>@c.Hours</td>
+                <td>@c.Rate</td>
+                <td>@c.Amount</td>
+                <td>@c.Status</td>
+                <td>@(c.SubmittedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                <td>@c.ManagerRemark</td>
+            </tr>
+        }
+    </tbody>
+</table>

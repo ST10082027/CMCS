@@ -1,40 +1,38 @@
-using Microsoft.AspNetCore.Identity;            // Identity 
-using Microsoft.EntityFrameworkCore;            // AddDbContext, UseSqlite
-using Microsoft.Extensions.Logging;            // ILogger<T>
-using CMCS.Data;                                // ApplicationDbContext, ApplicationUser
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using CMCS.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// MVC
 builder.Services.AddControllersWithViews();
 
 // EF Core + SQLite
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Identity + Roles + Tokens
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
-        options.Password.RequiredLength = 6;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireNonAlphanumeric = false;
-
-        // Make testing easy:
+        // Sign-in rules
         options.SignIn.RequireConfirmedAccount = false;
         options.SignIn.RequireConfirmedEmail = false;
-        options.Lockout.AllowedForNewUsers = false;
+
+        // Password rules (relaxed for demo/testing)
+        options.Password.RequiredLength = 6;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireDigit = false;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Logout";
-    options.AccessDeniedPath = "/Account/Login";
-});
-
 var app = builder.Build();
 
+// Pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -42,26 +40,46 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthentication();   // always use BEFORE UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
-app.MapStaticAssets();
+
+// Default route -> Login
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
-// Ensure DB is migrated, then seed roles/users (with logging)
+// Migrate + seed roles/users
 using (var scope = app.Services.CreateScope())
 {
     var sp = scope.ServiceProvider;
-
-    // 1) Ensure DB exists and schema is up to date
-    var db = sp.GetRequiredService<CMCS.Data.ApplicationDbContext>();
-    await db.Database.MigrateAsync();
-
-    // 2) Seed roles/users (with logging)
     var logger = sp.GetRequiredService<ILogger<Program>>();
-    await CMCS.Data.SeedIdentity.InitializeAsync(sp, logger);
+
+    // Apply any pending migrations
+    try
+    {
+        var db = sp.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync();
+        logger.LogInformation("Database migrated successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error running migrations.");
+        throw;
+    }
+
+    // Seed roles and default users
+    try
+    {
+        await SeedIdentity.InitializeAsync(sp, logger);
+        logger.LogInformation("Identity seeded successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error seeding identity.");
+        throw;
+    }
 }
+
 app.Run();
