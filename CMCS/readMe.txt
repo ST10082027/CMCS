@@ -1,47 +1,94 @@
-Welcome to CMCS
-This is a .NET Core MVC web application for streamlining Independent Contractor claim submissions,
-approvals, and payroll processing with secure role-based access.
+=============================================================================================================
+CMCS - Contract Monthly Claim System
+=============================================================================================================
+Welcome to CMCS.
+This is a .NET Core MVC web application built to help Independent Contractors (ICs) submit monthly claims,
+Managers (MRs) review and approve them, and Corporate Officers (COs) manage approvals and users.
+Each user type has their own secure dashboard and access level. hehe 
 
-SETUP
-#Trust the server certificate
+=============================================================================================================
+BASIC SETUP
+=============================================================================================================
+1. TRUST THE LOCAL HTTPS CERTIFICATE
+Run this command in your terminal:
 dotnet dev-certs https --trust
 
-1. Restore dependencies
-In the terminal of the project's location run the command:
-dotnet restore
+2. RESET THE DATABASE (optional but recommended)
+If you are setting up for the first time or starting fresh, run the following commands in the terminal of the 
+project directory:
+a. rm -rf Migrations
+b. dotnet ef migrations add Initial
+c. dotnet ef database drop -f
+d. dotnet ef database update
+This will clear out old migrations and rebuild the database.
 
-2. Apply migrations and create the database
-In the terminal of the project's location, run the command:
-dotnet ef migrations add InitIdentity
+=============================================================================================================
+RESTORE DEPENDENCIES
+=============================================================================================================
+Run this in the project directory's terminal:
+e. dotnet restore
 
-then run the command:
-dotnet ef database update
+=============================================================================================================
+BUILD AND RUN
+=============================================================================================================
+Run the following:
+f. dotnet run
+Once it’s running, open your browser and go to:
+g. https://localhost:5266
 
-3. Run the application
-In the terminal of the project's location, run the command:
-dotnet run
+=============================================================================================================
+SEEDED LOGIN DETAILS
+=============================================================================================================
+Role: Independent Contractor
+Email: ic@example.com
+Password: P@ssw0rd!
+Dashboard URL: .../ICDashboard
 
-4. Open your browser at https://localhost:5266.
+Role: Manager
+Email: mr@example.com
+Password: P@ssw0rd!
+Dashboard URL: .../MRDashboard
 
-5. Use the following seeded values to log in to the role specific dashboards:
-================================================================================
-Role                    : Username       : Password     : URL
-================================================================================
-Independent Contractor  : ic@example.com / P@ssw0rd!    : /ICDashboard
-Manager                 : mr@example.com / P@ssw0rd!    : /MRDashboard
-Corporate               : co@example.com / P@ssw0rd!    : /CODashboard
-================================================================================
+Role: Corporate Officer
+Email: co@example.com
+Password: P@ssw0rd!
+Dashboard URL: .../CODashboard
 
-4. Documentation
-ERD and UML diagrams are included (/docs/).
+=============================================================================================================
+ABOUT FILE UPLOADS
+=============================================================================================================
+Independent Contractors can attach supporting documents when submitting claims.
+This is optional but allows files such as:
+PDF, PNG, JPG, DOCX, XLSX, CSV and TXT. Each file can be up to 20 MB.
+Uploaded files are stored under: wwwroot/uploads/claims/[ClaimId]
+Managers and Corporate Officers can view and download these files.
 
-5. License
-This project is for educational purposes (POE for PROG6212).
+=============================================================================================================
+NOTES
+=============================================================================================================
+If you encounter migration issues, delete the Migrations folder and
+run the setup commands again from the top.
+This project was created for educational purposes
+as part of the PROG6212 Portfolio of Evidence.
 
 
+END OF FILE
 
-
-
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
+!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
 !@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
 !@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
 !@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
