@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;   // requires Microsoft.AspNetCore.Identity.EntityFrameworkCore
-using Microsoft.EntityFrameworkCore;                       // requires Microsoft.EntityFrameworkCore
-using CMCS.Data;
+using CMCS.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace CMCS.Data
 {
@@ -9,8 +9,24 @@ namespace CMCS.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
-        // Add DbSet<T> here later, e.g.:
-        // public DbSet<MonthlyClaim> MonthlyClaims { get; set; } = default!;
-        public DbSet<CMCS.Models.MonthlyClaim> MonthlyClaims { get; set; } = default!;
+        public DbSet<MonthlyClaim> MonthlyClaims { get; set; } = default!;
+        public DbSet<Document> Documents { get; set; } = default!; // <-- add if you’re using Document
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Unique: one claim per IC per month
+            modelBuilder.Entity<MonthlyClaim>()
+                .HasIndex(c => new { c.IcUserId, c.MonthKey })
+                .IsUnique();
+
+            // Optional: if you want a FK from Document -> MonthlyClaim
+            modelBuilder.Entity<Document>()
+                .HasOne<MonthlyClaim>()
+                .WithMany()
+                .HasForeignKey(d => d.MonthlyClaimId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

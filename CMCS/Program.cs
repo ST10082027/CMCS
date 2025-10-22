@@ -2,8 +2,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using CMCS.Data;
+using CMCS.Infrastructure;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// === Console logging on ===
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 // MVC
 builder.Services.AddControllersWithViews();
@@ -29,6 +35,12 @@ builder.Services
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+// log every action enter/exit
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<ActionLoggingFilter>();
+});
 
 var app = builder.Build();
 

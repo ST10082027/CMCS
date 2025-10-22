@@ -5,7 +5,7 @@
 namespace CMCS.Migrations
 {
     /// <inheritdoc />
-    public partial class MeaningfulName : Migration
+    public partial class AllowMultipleClaimsPerMonth : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

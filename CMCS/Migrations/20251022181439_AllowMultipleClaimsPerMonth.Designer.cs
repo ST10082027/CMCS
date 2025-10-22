@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMCS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251021210801_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251022181439_AllowMultipleClaimsPerMonth")]
+    partial class AllowMultipleClaimsPerMonth
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -97,14 +97,57 @@ namespace CMCS.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("CMCS.Models.Document", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FileSize")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MonthlyClaimId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MonthlyClaimId");
+
+                    b.ToTable("Documents");
+                });
+
             modelBuilder.Entity("CMCS.Models.MonthlyClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("Hours")
+                    b.Property<DateTime?>("ApprovedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Hours")
+                        .HasColumnType("decimal(7,2)");
 
                     b.Property<string>("IcUserId")
                         .IsRequired()
@@ -118,7 +161,14 @@ namespace CMCS.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime?>("RejectedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
@@ -127,9 +177,13 @@ namespace CMCS.Migrations
                     b.Property<DateTime?>("SubmittedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("IcUserId");
+                    b.HasIndex("IcUserId", "MonthKey")
+                        .IsUnique();
 
                     b.ToTable("MonthlyClaims");
                 });
@@ -260,6 +314,15 @@ namespace CMCS.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("CMCS.Models.Document", b =>
+                {
+                    b.HasOne("CMCS.Models.MonthlyClaim", null)
+                        .WithMany()
+                        .HasForeignKey("MonthlyClaimId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CMCS.Models.MonthlyClaim", b =>

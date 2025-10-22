@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CMCS.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -167,11 +167,16 @@ namespace CMCS.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     IcUserId = table.Column<string>(type: "TEXT", nullable: false),
                     MonthKey = table.Column<string>(type: "TEXT", nullable: false),
-                    Hours = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Rate = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Hours = table.Column<decimal>(type: "decimal(7,2)", nullable: false),
+                    Rate = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     SubmittedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    ManagerRemark = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true)
+                    ManagerRemark = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
+                    Notes = table.Column<string>(type: "TEXT", maxLength: 2000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ApprovedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    RejectedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -180,6 +185,29 @@ namespace CMCS.Migrations
                         name: "FK_MonthlyClaims_AspNetUsers_IcUserId",
                         column: x => x.IcUserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Documents",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    MonthlyClaimId = table.Column<int>(type: "INTEGER", nullable: false),
+                    FileName = table.Column<string>(type: "TEXT", maxLength: 260, nullable: false),
+                    ContentType = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    FileSize = table.Column<int>(type: "INTEGER", nullable: false),
+                    StoragePath = table.Column<string>(type: "TEXT", maxLength: 512, nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Documents", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Documents_MonthlyClaims_MonthlyClaimId",
+                        column: x => x.MonthlyClaimId,
+                        principalTable: "MonthlyClaims",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -222,9 +250,15 @@ namespace CMCS.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_MonthlyClaims_IcUserId",
+                name: "IX_Documents_MonthlyClaimId",
+                table: "Documents",
+                column: "MonthlyClaimId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MonthlyClaims_IcUserId_MonthKey",
                 table: "MonthlyClaims",
-                column: "IcUserId");
+                columns: new[] { "IcUserId", "MonthKey" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -246,10 +280,13 @@ namespace CMCS.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "MonthlyClaims");
+                name: "Documents");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "MonthlyClaims");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
