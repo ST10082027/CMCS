@@ -14,6 +14,7 @@
             <th>Rate</th>
             <th>Amount</th>
             <th>Status</th>
+            <th>Docs</th>
             <th>Submitted At</th>
             <th></th>
         </tr>
@@ -27,6 +28,30 @@
             <td>@c.Rate</td>
             <td>@c.Amount</td>
             <td>@c.Status</td>
+            <td>
+                @if (c.Documents != null && c.Documents.Any())
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            @c.Documents.Count
+                        </button>
+                        <ul class="dropdown-menu">
+                            @foreach (var d in c.Documents)
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Claims" asp-action="DownloadDocument" asp-route-id="@d.Id">
+                                        @d.FileName
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <span class="text-muted">—</span>
+                }
+            </td>
             <td>@(c.SubmittedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
             <td>
                 @if (c.Status == CMCS.Models.ClaimStatus.Draft || c.Status == CMCS.Models.ClaimStatus.Rejected)

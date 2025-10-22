@@ -9,24 +9,36 @@ namespace CMCS.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
-        public DbSet<MonthlyClaim> MonthlyClaims { get; set; } = default!;
-        public DbSet<Document> Documents { get; set; } = default!; // <-- add if you’re using Document
+        public DbSet<MonthlyClaim> MonthlyClaims { get; set; } = null!;
+        public DbSet<Document> Documents { get; set; } = null!;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
 
             // Unique: one claim per IC per month
-            modelBuilder.Entity<MonthlyClaim>()
+            builder.Entity<MonthlyClaim>()
                 .HasIndex(c => new { c.IcUserId, c.MonthKey })
                 .IsUnique();
 
-            // Optional: if you want a FK from Document -> MonthlyClaim
-            modelBuilder.Entity<Document>()
-                .HasOne<MonthlyClaim>()
-                .WithMany()
-                .HasForeignKey(d => d.MonthlyClaimId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // Document configuration
+            builder.Entity<Document>(e =>
+            {
+                e.HasKey(d => d.Id);
+
+                e.Property(d => d.FileName).HasMaxLength(260).IsRequired();
+                e.Property(d => d.ContentType).HasMaxLength(128).IsRequired();
+                e.Property(d => d.StoragePath).HasMaxLength(512).IsRequired();
+
+                // Explicit, single relationship: Document (many) -> MonthlyClaim (one)
+                e.HasOne(d => d.MonthlyClaim)
+                 .WithMany(c => c.Documents)
+                 .HasForeignKey(d => d.MonthlyClaimId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                // Safety: if EF cached a shadow prop, ignore it explicitly
+                e.Ignore("MonthlyClaimId1");
+            });
         }
     }
 }

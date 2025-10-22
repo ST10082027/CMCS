@@ -12,6 +12,7 @@
             <th>Hours</th>
             <th>Rate</th>
             <th>Amount</th>
+            <th>Docs</th>
             <th>Status</th>
             <th>Submitted</th>
             <th>Remark</th>
@@ -26,6 +27,33 @@
                 <td>@c.Hours</td>
                 <td>@c.Rate</td>
                 <td>@c.Amount</td>
+                <td>
+                    @if (c.Documents != null && c.Documents.Any())
+                    {
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                @c.Documents.Count
+                            </button>
+                            <ul class="dropdown-menu">
+                                @foreach (var d in c.Documents)
+                                {
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Claims"
+                                           asp-action="DownloadDocument"
+                                           asp-route-id="@d.Id">
+                                            @d.FileName
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
                 <td>@c.Status</td>
                 <td>@(c.SubmittedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
                 <td>@c.ManagerRemark</td>

@@ -116,7 +116,7 @@
 
 <h2 class="mb-3">@ViewData["Title"]</h2>
 
-<form id="claimForm" asp-controller="Claims" asp-action="Summary" method="post">
+<form id="claimForm" asp-controller="Claims" asp-action="Summary" method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
 
     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
@@ -137,6 +137,27 @@
     <input type="hidden" asp-for="Rate" />
     @* (b) Raw entries as JSON for server-side recomputation/validation (exact name required) *@
     <input type="hidden" id="entriesJson" name="entriesJson" />
+
+    <!-- ===== Supporting documents (optional) ===== -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">Supporting documents (optional)</h6>
+                    <small class="text-muted">PDF, images, Word/Excel, CSV, TXT (≤ 20 MB each). Files will be saved when you click <em>Finish</em> on the next screen.</small>
+                </div>
+                <div>
+                    <input id="SupportingFiles" name="SupportingFiles" type="file" multiple hidden
+                           accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx,.csv,.txt" />
+                    <button type="button" class="btn btn-outline-primary"
+                            onclick="document.getElementById('SupportingFiles').click()">
+                        Add supporting documents
+                    </button>
+                </div>
+            </div>
+            <ul id="selected-files" class="mt-3 small"></ul>
+        </div>
+    </div>
 
     <div class="mb-3">
         <label class="form-label fw-bold">Select your work days</label>
@@ -440,6 +461,21 @@
                 }
                 const token = form.querySelector('input[name="__RequestVerificationToken"]');
                 console.log('[Create] Found anti-forgery token?', !!token, token ? '(len ' + token.value.length + ')' : '');
+            });
+        })();
+
+        // Show selected files (note: due to PRG, actual upload occurs on Finish)
+        (function () {
+            const input = document.getElementById('SupportingFiles');
+            const list = document.getElementById('selected-files');
+            if (!input || !list) return;
+            input.addEventListener('change', () => {
+                list.innerHTML = '';
+                for (const f of input.files) {
+                    const li = document.createElement('li');
+                    li.textContent = `${f.name} (${(f.size / 1024).toFixed(1)} KB)`;
+                    list.appendChild(li);
+                }
             });
         })();
     </script>

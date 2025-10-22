@@ -12,6 +12,7 @@
             <th>Hours</th>
             <th>Rate</th>
             <th>Amount</th>
+            <th>Docs</th>
             <th>Submitted</th>
             <th></th>
         </tr>
@@ -25,6 +26,33 @@
                 <td>@c.Hours</td>
                 <td>@c.Rate</td>
                 <td>@c.Amount</td>
+                <td>
+                    @if (c.Documents != null && c.Documents.Any())
+                    {
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                @c.Documents.Count
+                            </button>
+                            <ul class="dropdown-menu">
+                                @foreach (var d in c.Documents)
+                                {
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Claims"
+                                           asp-action="DownloadDocument"
+                                           asp-route-id="@d.Id">
+                                            @d.FileName
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
                 <td>@(c.SubmittedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))</td>
                 <td>
                     <form asp-action="Approve" asp-route-id="@c.Id" method="post" class="d-inline">
@@ -32,7 +60,7 @@
                     </form>
                     <form asp-action="Reject" asp-route-id="@c.Id" method="post" class="d-inline">
                         <input type="text" name="remark" placeholder="Reason…" class="form-control d-inline"
-                            style="width: 180px;" />
+                               style="width: 180px;" />
                         <button class="btn btn-sm btn-danger" type="submit">Reject</button>
                     </form>
                 </td>

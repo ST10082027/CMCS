@@ -12,7 +12,7 @@ namespace CMCS.Models
         Approved = 2,
         Rejected = 3
     }
-
+    
     public class MonthlyClaim : IValidatableObject
     {
         public int Id { get; set; }
@@ -76,6 +76,10 @@ namespace CMCS.Models
         [Display(Name = "Manager Remark")]
         [StringLength(2000)]
         public string? ManagerRemark { get; set; }
+
+        // === Attachments ===
+        // Navigation to uploaded supporting documents (see Models/Document.cs)
+        public ICollection<Document> Documents { get; set; } = new List<Document>();
 
         // Lecturer can add context before submitting
         [Display(Name = "Notes")]

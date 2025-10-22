@@ -315,11 +315,13 @@ namespace CMCS.Migrations
 
             modelBuilder.Entity("CMCS.Models.Document", b =>
                 {
-                    b.HasOne("CMCS.Models.MonthlyClaim", null)
-                        .WithMany()
+                    b.HasOne("CMCS.Models.MonthlyClaim", "MonthlyClaim")
+                        .WithMany("Documents")
                         .HasForeignKey("MonthlyClaimId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("MonthlyClaim");
                 });
 
             modelBuilder.Entity("CMCS.Models.MonthlyClaim", b =>
@@ -382,6 +384,11 @@ namespace CMCS.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CMCS.Models.MonthlyClaim", b =>
+                {
+                    b.Navigation("Documents");
                 });
 #pragma warning restore 612, 618
         }

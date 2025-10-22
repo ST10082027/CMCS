@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+// NEW usings for file uploads
+using Microsoft.AspNetCore.Http;
+using System.IO;
+
 namespace CMCS.Controllers
 {
     [Authorize]
@@ -16,15 +20,18 @@ namespace CMCS.Controllers
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<ClaimsController> _logger;
+        private readonly IWebHostEnvironment _env; // NEW
 
         public ClaimsController(
             ApplicationDbContext db,
             UserManager<ApplicationUser> userManager,
-            ILogger<ClaimsController> logger)
+            ILogger<ClaimsController> logger,
+            IWebHostEnvironment env) // NEW
         {
             _db = db;
             _userManager = userManager;
             _logger = logger;
+            _env = env; // NEW
         }
 
         // ===== IC: My Claims =====
@@ -33,6 +40,7 @@ namespace CMCS.Controllers
         {
             var uid = _userManager.GetUserId(User)!;
             var list = await _db.MonthlyClaims
+                .Include(c => c.Documents) // NEW
                 .Where(c => c.IcUserId == uid)
                 .OrderByDescending(c => c.SubmittedAt)
                 .ThenByDescending(c => c.Id)
@@ -62,7 +70,6 @@ namespace CMCS.Controllers
         }
 
         // --- POST: /Claims/Summary ---
-        // We set IcUserId from the logged-in user and recompute Hours server-side from entriesJson, capped to 1 dp.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Summary(MonthlyClaim model, [FromForm] string? entriesJson)
@@ -152,12 +159,11 @@ namespace CMCS.Controllers
 
         // --- POST: /Claims/Finish ---
         // Persists the claim and redirects to /Claims/My
-        // NEW: If a claim for the same MonthKey already exists for this user,
-        //      show an info message and redirect to My (no exception).
+        // NEW: supports optional file uploads (SupportingFiles)
         [Authorize(Roles = "IC")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Finish([FromForm] string summaryJson)
+        public async Task<IActionResult> Finish([FromForm] string summaryJson, List<IFormFile>? SupportingFiles) // CHANGED
         {
             _logger.LogInformation("POST /Claims/Finish hit. summaryJson length: {Len}", summaryJson?.Length ?? 0);
 
@@ -222,11 +228,67 @@ namespace CMCS.Controllers
 
             _db.MonthlyClaims.Add(claim);
             await _db.SaveChangesAsync();
-
-            TempData["ok"] = "Your claim has been submitted for review.";
             _logger.LogInformation("Claim {Id} persisted for user {UserId} with Hours={Hours}, Rate={Rate}, MonthKey={MonthKey}",
                 claim.Id, userId, claim.Hours, claim.Rate, claim.MonthKey);
 
+            // === Handle optional supporting files ===
+            if (SupportingFiles is { Count: > 0 })
+            {
+                var claimId = claim.Id;
+                var uploadsRoot = Path.Combine(_env.WebRootPath ?? "wwwroot", "uploads", "claims", claimId.ToString());
+                Directory.CreateDirectory(uploadsRoot);
+
+                // Basic allow-list (extend as needed)
+                var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "application/pdf",
+                    "image/png", "image/jpeg",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "text/plain", "text/csv"
+                };
+                const long maxBytes = 20L * 1024 * 1024; // 20 MB per file
+
+                foreach (var file in SupportingFiles)
+                {
+                    if (file == null || file.Length == 0) continue;
+                    if (file.Length > maxBytes)
+                    {
+                        _logger.LogWarning("Skipped {File} > 20MB", file.FileName);
+                        continue;
+                    }
+                    if (!string.IsNullOrEmpty(file.ContentType) && !allowed.Contains(file.ContentType))
+                    {
+                        _logger.LogWarning("Skipped {File} unsupported content-type {CT}", file.FileName, file.ContentType);
+                        continue;
+                    }
+
+                    var ext = Path.GetExtension(file.FileName);
+                    var stored = $"{Guid.NewGuid():N}{ext}";
+                    var fullPath = Path.Combine(uploadsRoot, stored);
+                    await using (var stream = System.IO.File.Create(fullPath))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    var doc = new Document
+                    {
+                        Id = Guid.NewGuid(),
+                        MonthlyClaimId = claimId,
+                        FileName = file.FileName,
+                        ContentType = string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+                        FileSize = (int)file.Length,
+                        StoragePath = Path.Combine("uploads", "claims", claimId.ToString(), stored),
+                        UploadedAt = DateTime.UtcNow
+                    };
+                    _db.Documents.Add(doc);
+                }
+                await _db.SaveChangesAsync();
+            }
+
+            TempData["ok"] = "Your claim has been submitted for review.";
             return RedirectToAction(nameof(My));
         }
 
@@ -303,6 +365,7 @@ namespace CMCS.Controllers
         {
             var list = await _db.MonthlyClaims
                 .Include(c => c.IcUser)
+                .Include(c => c.Documents) // NEW
                 .Where(c => c.Status == ClaimStatus.Pending)
                 .OrderBy(c => c.SubmittedAt)
                 .ThenBy(c => c.Id)
@@ -364,11 +427,29 @@ namespace CMCS.Controllers
         {
             var list = await _db.MonthlyClaims
                 .Include(c => c.IcUser)
+                .Include(c => c.Documents) // NEW
                 .OrderByDescending(c => c.SubmittedAt)
                 .ThenByDescending(c => c.Id)
                 .ToListAsync();
 
             return View(list);
+        }
+
+        // ===== Downloads =====
+        // IC, MR, and CO can download stored documents
+        [Authorize(Roles = "IC,MR,CO")]
+        [HttpGet("/Claims/DownloadDocument/{id:guid}")]
+        public async Task<IActionResult> DownloadDocument(Guid id)
+        {
+            var doc = await _db.Documents.FirstOrDefaultAsync(d => d.Id == id);
+            if (doc == null) return NotFound();
+
+            var fullPath = Path.Combine(_env.WebRootPath ?? "wwwroot",
+                doc.StoragePath.Replace('/', Path.DirectorySeparatorChar));
+            if (!System.IO.File.Exists(fullPath)) return NotFound();
+
+            var stream = System.IO.File.OpenRead(fullPath);
+            return File(stream, doc.ContentType, doc.FileName);
         }
 
         // ===== Helpers =====

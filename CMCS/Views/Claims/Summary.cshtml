@@ -66,9 +66,13 @@
                 <a asp-action="New" asp-controller="Claims" class="btn btn-outline-secondary">Back</a>
 
                 <!-- Finish: persist and go to My Claims -->
-                <form asp-action="Finish" asp-controller="Claims" method="post" class="d-inline">
+                <form asp-action="Finish" asp-controller="Claims" method="post" class="d-inline" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="summaryJson" value='@summaryJson' />
+                    <!-- Optional supporting docs -->
+                    <input id="SupportingFiles" name="SupportingFiles" type="file" multiple
+                           accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx,.csv,.txt" class="form-control mb-2" />
+                    <small class="text-muted d-block mb-2">Attach supporting documents (optional, ≤ 20 MB each).</small>
                     <button type="submit" class="btn btn-success">Finish</button>
                 </form>
             </div>

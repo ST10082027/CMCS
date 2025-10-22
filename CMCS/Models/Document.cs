@@ -1,26 +1,23 @@
-using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace CMCS.Models
 {
     public class Document
     {
-        [Key]
         public Guid Id { get; set; }
 
-        [Required]
-        public int MonthlyClaimId { get; set; }  // FK to MonthlyClaim
+        // FK must match MonthlyClaim.Id (int)
+        public int MonthlyClaimId { get; set; }
 
-        [Required, MaxLength(260)]
-        public string FileName { get; set; } = string.Empty;
+        // Single, unambiguous navigation
+        public MonthlyClaim MonthlyClaim { get; set; } = null!;
 
-        [Required, MaxLength(128)]
-        public string ContentType { get; set; } = string.Empty;
-
-        [Range(0, int.MaxValue)]
+        public string FileName { get; set; } = null!;
+        public string ContentType { get; set; } = "application/octet-stream";
         public int FileSize { get; set; }
 
-        [Required, MaxLength(512)]
-        public string StoragePath { get; set; } = string.Empty;
+        // Relative path under wwwroot, e.g. "uploads/claims/123/xyz.pdf"
+        public string StoragePath { get; set; } = null!;
 
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
     }
