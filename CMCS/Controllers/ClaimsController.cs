@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 
-namespace CMCS.Controllers.LecturerControllers
+namespace CMCS.Controllers
 {
     // Require login for everything in this controller; per-action roles below
     [SessionAuthorize]
