@@ -94,6 +94,33 @@ namespace CMCS.Controllers
             return View("~/Views/GenericViews/AccessDenied.cshtml");
         }
 
+        // ========= RETURN TO DASHBOARD (ROLE-AWARE) =========
+        [HttpGet]
+        public IActionResult ReturnToDashboard()
+        {
+            // Read the current user role from Session
+            var userRole = HttpContext.Session.GetString("UserRole");
+
+            // If the user somehow get here with no session, send them to Login
+            if (string.IsNullOrEmpty(userRole))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Redirect based on role
+            return userRole switch
+            {
+                "Lecturer" => RedirectToAction("Index", "LecturerDashboard"),
+                "Coordinator" => RedirectToAction("Index", "ProgrammeCoordinatorDashboard"),
+                "AcademicManager" => RedirectToAction("Index", "AcademicManagerDashboard"),
+                "HR" => RedirectToAction("Index", "HRDashboard"),
+
+                // Fallback – if role is unknown, use the generic dashboard
+                _ => RedirectToAction("Index", "Dashboard")
+            };
+        }
+
+
         [HttpGet]
         public IActionResult Exit()
         {
