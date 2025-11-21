@@ -9,6 +9,10 @@ Each user type has their own secure dashboard and access level. hehe
 =============================================================================================================
 BASIC SETUP
 =============================================================================================================
+0. OPEN THE PROJECT IN VS CODE
+The project should be opened in VS Code...
+...
+
 1. TRUST THE LOCAL HTTPS CERTIFICATE
 Run this command in the terminal of the project directory:
 dotnet dev-certs https --trust
@@ -92,10 +96,9 @@ Password: P@ssw0rd!
 ABOUT FILE UPLOADS
 =============================================================================================================
 Independent Contractors can attach supporting documents when submitting claims.
-This is optional but allows files such as:
-PDF, PNG, JPG, DOCX, XLSX, CSV and TXT. 
-Uploaded files are stored under: wwwroot/uploads/claims/[ClaimId]
-Managers and Corporate Officers can view and download these files.
+This is optional but allows files such as: PDF, PNG, JPG, DOCX, XLSX, CSV and TXT. 
+Uploaded files are stored under:
+Academic Managers and Human Resources can view and download these files.
 
 =============================================================================================================
 NOTES
