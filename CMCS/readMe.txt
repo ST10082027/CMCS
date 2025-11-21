@@ -103,4 +103,67 @@ NOTES
 If you encounter migration issues, run the setup commands again from the top.
 This project was created for educational purposes as part of the PROG6212 Portfolio of Evidence.
 
+=============================================================================================================
+LECTURER FEEDBACK |  PART 2 - - - > PART 3
+=============================================================================================================
+
+Feedback quote:
+"Your program does not actually distinguish the different roles between Coordinator and Manager.
+Please read the POE's instructions for Part 3 and adjust accordingly."
+xxxxxxx
+Improvement made:
+The revised system now fully separates the Programme Coordinator and Academic Manager roles, ensuring
+each user sees only the functions and data relevant to their responsibilities. There are now four roles
+within the CMCS system, namely: Lecturers, Programme Coordinators, Academic Managers and Human Resources. 
+Lecturers can only submit and alter previously submitted claims. Coordinators can verify submitted claims,
+while Managers can only approve claims that have already been verified. This aligns directly with the POE
+workflow that requires a verification–approval hierarchy. Session-based authorisation has also been implemented
+instead of .NET Identity.
+
+Feedback quote:
+"Program failed to create claims & upload documents, and not user-friendly as separation of concerns is
+inefficient. What is a Corporate Officer?"
+xxxxxxx
+Improvements made: 
+The corporate officer was misunderstood. ‘CO’ was the backends’ abbreviation for a ‘Corporate’ user role, 
+which has subsequently been changed to a Human Resources / HR role. However, as previously mentioned, the 
+CMCS system now has four roles.he redesigned application now follows proper separation of concerns with 
+cleaner controllers, services and data-layer organisation, resulting in a smoother, more user-friendly 
+workflow for creating claims. Lecturers can submit claims without system breaks, and document uploads are
+now stable, validated and linked correctly to claims. The confusing “Corporate Officer” term has been
+removed entirely and replaced with the correct POE-mandated roles—Coordinator, Manager, and HR—to ensure
+consistency with Part 3's terminology and avoid ambiguity.
+
+Feedback quote:
+"Approval workflow not implemented per POE requirements."
+xxxxxxx
+Improvements made: 
+The approval chain now follows the exact four-stage process required by the POE: Submission by Lecturer,
+verification by Coordinator, approval by Manager and finalisation by Human Resources. Each stage triggers
+a status update that becomes visible to the lecturer and the system prevents steps from being skipped or
+repeated incorrectly.
+
+Feedback quote:
+"Uploaded documents are stored in wwwroot, unencrypted, and no file type validation."
+xxxxxxx
+Improvements made: 
+Uploaded documents are now stored database. File type restrictions, size limits and server-side validation
+ensure only safe formats.
+
+Feedback quote:
+"Unit testing not conducted."
+xxxxxxx
+Improvements made: 
+Twenty one unit tests have now been added to cover core features. Features such as claim creation, calculations,
+role access restrictions, document validation and workflow transitions. This ensures reliability across all major
+components. This directly addresses the earlier feedback noting the absence of any unit testing.
+
+Feedback quote:
+"Overall very confusing program."
+xxxxxxx
+Improvements made: 
+The entire application has been reorganised. Everything from the code, folders, filenames, etc.. This was done
+to follow a cleaner structure with intuitive navigation based on user roles. Views are grouped logically, 
+labels have been refined, front-end reworked, backend organised and the workflow has been simplified. This was
+done to support the end user with minimal confusion. Hopefully this improves readability, system wide!
 END OF FILE
