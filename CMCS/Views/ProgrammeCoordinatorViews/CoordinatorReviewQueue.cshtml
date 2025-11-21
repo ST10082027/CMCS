@@ -1,0 +1,36 @@
+@model IEnumerable<CMCS.Models.MonthlyClaim>
+@{
+    ViewData["Title"] = "Claims to Verify";
+}
+
+<h2>Claims to Verify</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Lecturer</th>
+            <th>Month</th>
+            <th>Hours</th>
+            <th>Amount</th>
+            <th>Submitted</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.LecturerUser?.FullName</td>
+                <td>@c.MonthKey</td>
+                <td>@c.Hours</td>
+                <td>@c.Amount.ToString("C")</td>
+                <td>@c.SubmittedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    <a asp-action="Review" asp-route-id="@c.Id" class="btn btn-sm btn-primary">
+                        Review
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

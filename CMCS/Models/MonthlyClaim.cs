@@ -1,35 +1,52 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
-using CMCS.Data;
 
 namespace CMCS.Models
 {
     public enum ClaimStatus
     {
-        Draft = 0,
-        Pending = 1,
-        Approved = 2,
-        Rejected = 3
+        Draft = 0,                  // Lecturer still editing
+        Pending = 1,                // Submitted by Lecturer – waiting for Coordinator
+        VerifiedByCoordinator = 2,  // Coordinator has verified
+        ApprovedByManager = 3,      // Academic Manager has approved
+
+        // Alias to keep existing views happy (ClaimStatus.Approved)
+        Approved = ApprovedByManager,
+
+        Rejected = 4,               // Rejected by Coordinator or Manager
+        FinalisedByHR = 5           // Finalised by HR
     }
-    
+
     public class MonthlyClaim : IValidatableObject
     {
         public int Id { get; set; }
 
-        // === Ownership ===
+        // === Ownership (Lecturer) ===
         [Required]
         public string IcUserId { get; set; } = string.Empty;
-        public ApplicationUser? IcUser { get; set; }
 
-        // === Period key (e.g. "2025-10") ===
-        // Stored column (see migration AddMonthlyClaims): e.g. "2025-10"
+        // Custom user (Session-based auth)
+        public UserAccount? IcUser { get; set; }
+
+        // Programme Coordinator who verified the claim (optional)
+        public string? CoordinatorUserId { get; set; }
+        public UserAccount? CoordinatorUser { get; set; }
+
+        // Convenience property used in some older views (maps to IcUser)
+        [NotMapped]
+        public UserAccount? LecturerUser
+        {
+            get => IcUser;
+            set => IcUser = value;
+        }
+
+        // === Period key (YYYY-MM) ===
         [Required]
         [Display(Name = "Month")]
         [RegularExpression(@"^\d{4}-\d{2}$", ErrorMessage = "Month must be formatted as YYYY-MM")]
         public string MonthKey { get; set; } = $"{DateTime.UtcNow:yyyy-MM}";
 
-        // Convenience accessors (not mapped)
         [NotMapped]
         public int Year
         {
@@ -52,9 +69,11 @@ namespace CMCS.Models
         public string PeriodLabel => MonthKey;
 
         // === Financials ===
-        [Range(0, 5000)]
+        /// <summary>
+        /// Total hours for the month. Spec: must not exceed 180 hours.
+        /// </summary>
+        [Range(0, 180, ErrorMessage = "Total hours for a month cannot exceed 180.")]
         [Column(TypeName = "decimal(7,2)")]
-        [Display(Name = "Hours")]
         public decimal Hours { get; set; }
 
         [Range(0, 100000)]
@@ -66,45 +85,34 @@ namespace CMCS.Models
         [Display(Name = "Amount (R)")]
         public decimal Amount => Math.Round(Hours * Rate, 2);
 
-        // === Workflow/status ===
-        [Display(Name = "Submitted At")]
+        // === Workflow & timestamps ===
         public DateTime? SubmittedAt { get; set; }
 
-        [Display(Name = "Status")]
         public ClaimStatus Status { get; set; } = ClaimStatus.Draft;
 
-        [Display(Name = "Manager Remark")]
+        /// <summary>
+        /// When the Programme Coordinator verified the claim.
+        /// </summary>
+        public DateTime? VerifiedAt { get; set; }
+
         [StringLength(2000)]
         public string? ManagerRemark { get; set; }
 
-        // === Attachments ===
-        // Navigation to uploaded supporting documents (see Models/Document.cs)
         public ICollection<Document> Documents { get; set; } = new List<Document>();
 
-        // Lecturer can add context before submitting
-        [Display(Name = "Notes")]
         [StringLength(2000)]
         public string? Notes { get; set; }
 
-        // === Timestamps for transparency ===
-        [Display(Name = "Created At")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        [Display(Name = "Updated At")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-        [Display(Name = "Approved At")]
         public DateTime? ApprovedAt { get; set; }
-
-        [Display(Name = "Rejected At")]
         public DateTime? RejectedAt { get; set; }
 
-        // === Helpers ===
         public static string BuildMonthKey(int year, int month) => $"{year:D4}-{month:D2}";
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Validate MonthKey format and range
+            // Validate month format
             if (!Regex.IsMatch(MonthKey, @"^\d{4}-\d{2}$"))
             {
                 yield return new ValidationResult(
@@ -121,7 +129,29 @@ namespace CMCS.Models
                 }
             }
 
-            // If pending, ensure SubmittedAt is present
+            // Business rule: max 180 hours per month (server-side, even if the UI misbehaves)
+            if (Hours > 180)
+            {
+                yield return new ValidationResult(
+                    "Total hours for a single month may not exceed 180.",
+                    new[] { nameof(Hours) });
+            }
+
+            if (Hours < 0)
+            {
+                yield return new ValidationResult(
+                    "Hours cannot be negative.",
+                    new[] { nameof(Hours) });
+            }
+
+            if (Rate < 0)
+            {
+                yield return new ValidationResult(
+                    "Hourly rate cannot be negative.",
+                    new[] { nameof(Rate) });
+            }
+
+            // If pending, SubmittedAt must exist
             if (Status == ClaimStatus.Pending && SubmittedAt == null)
             {
                 yield return new ValidationResult(
@@ -129,7 +159,6 @@ namespace CMCS.Models
                     new[] { nameof(SubmittedAt), nameof(Status) });
             }
 
-            // Basic sanity: Amount must be >= 0 (given your ranges this should hold)
             if (Amount < 0)
             {
                 yield return new ValidationResult(

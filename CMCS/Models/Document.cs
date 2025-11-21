@@ -20,5 +20,9 @@ namespace CMCS.Models
         public string StoragePath { get; set; } = null!;
 
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+
+        // Set from the logged-in user (Session) when the document is created.
+        // Non-nullable because every document must have an uploader.
+        public string UploadedByUserId { get; set; } = null!;
     }
 }

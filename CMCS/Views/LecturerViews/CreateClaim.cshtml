@@ -1,0 +1,783 @@
+@model CMCS.Models.MonthlyClaim
+@{
+    ViewData["Title"] = "Create Claim";
+}
+
+<style>
+    /* ===== Calendar + Month Selector Aesthetics ===== */
+    .calendar-card {
+        border-radius: 1rem;
+        box-shadow: 0 8px 26px rgba(0, 0, 0, .06);
+        border: 1px solid rgba(0, 0, 0, .06);
+        background: #fff;
+    }
+
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: .5rem;
+        margin-bottom: .5rem;
+        text-align: center;
+    }
+
+    .calendar-header .weekday {
+        font-weight: 600;
+        font-size: .95rem;
+        color: #495057;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: .65rem;
+        padding: .5rem 0;
+        user-select: none;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: .5rem;
+    }
+
+    .day-cell {
+        position: relative;
+        min-height: 4rem;
+        border-radius: .9rem;
+        border: 1px solid #e9ecef;
+        background: #ffffff;
+        padding: .35rem .5rem .4rem .5rem;
+        cursor: pointer;
+        transition: all .15s ease-in-out;
+        text-align: left;
+    }
+
+    .day-cell:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 .15rem rgba(13, 110, 253, .15);
+        transform: translateY(-1px);
+    }
+
+    .day-cell.empty {
+        background: #f8f9fa;
+        border-style: dashed;
+        cursor: default;
+        box-shadow: none;
+    }
+
+    .day-cell.empty:hover {
+        border-color: #e9ecef;
+        transform: none;
+    }
+
+    .day-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        color: #495057;
+        background: #e9ecef;
+    }
+
+    .day-number.badge-success {
+        background: #198754;
+        color: #fff;
+        box-shadow: 0 0 0 2px rgba(25, 135, 84, .15);
+    }
+
+    .day-number.badge-today {
+        background: #0d6efd;
+        color: #fff;
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, .15);
+    }
+
+    .status-pill {
+        position: absolute;
+        top: .35rem;
+        right: .5rem;
+        font-size: .7rem;
+        padding: .1rem .45rem;
+        border-radius: 999px;
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .status-pill.has-entry {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-pill.error {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .day-time {
+        font-size: .9rem;
+        color: #6c757d;
+        margin-top: .35rem;
+        min-height: 1.25rem;
+    }
+
+    .day-cell.btn-success {
+        color: #0b2e13;
+        background: #e9f7ef;
+        border-color: #cfe9da !important;
+    }
+
+    .day-cell.btn-success .day-number {
+        background: #198754;
+        color: #fff;
+    }
+
+    .day-cell.btn-success .day-time {
+        color: #198754;
+    }
+
+    .is-today {
+        outline: 2px solid rgba(13, 110, 253, .25);
+        outline-offset: 2px;
+        background: linear-gradient(0deg, #f8fbff 0%, #ffffff 100%);
+    }
+
+    #entriesTable {
+        border-radius: .75rem;
+        overflow: hidden;
+    }
+
+    #entriesTable thead th {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: 600;
+    }
+
+    /* ===== Month / Year wheel selector (inside calendar) ===== */
+    .month-year-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .month-wheel,
+    .year-wheel {
+        position: relative;
+        flex: 1;
+        max-width: 180px;
+        overflow: hidden;
+    }
+
+    .month-wheel select,
+    .year-wheel select {
+        width: 100%;
+        height: 7.5rem;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        text-align: center;
+        font-size: 1rem;
+        line-height: 1.1;
+        border-radius: .75rem;
+    }
+
+    .month-wheel::before,
+    .month-wheel::after,
+    .year-wheel::before,
+    .year-wheel::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 1.5rem;
+        pointer-events: none;
+    }
+
+    .month-wheel::before,
+    .year-wheel::before {
+        top: 0;
+        background: linear-gradient(to bottom, rgba(248, 249, 250, 1), rgba(248, 249, 250, 0));
+    }
+
+    .month-wheel::after,
+    .year-wheel::after {
+        bottom: 0;
+        background: linear-gradient(to top, rgba(248, 249, 250, 1), rgba(248, 249, 250, 0));
+    }
+</style>
+
+<h2 class="mb-3">@ViewData["Title"]</h2>
+
+<form id="claimForm" asp-controller="Claims" asp-action="Summary" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <input type="hidden" asp-for="Id" />
+
+    @* Hidden MonthKey + validation *@
+    <input asp-for="MonthKey" class="form-control d-none" id="monthKeyInput" />
+    <span asp-validation-for="MonthKey" class="text-danger"></span>
+
+    @* Hours & Rate are handled server-side; Hours derived from entries *@
+    <input type="hidden" asp-for="Hours" id="hoursInput" />
+    <input type="hidden" asp-for="Rate" />
+
+    @* Raw entries as JSON for server-side recomputation/validation *@
+    <input type="hidden" id="entriesJson" name="entriesJson" />
+
+    <!-- Calendar + Work Summary side by side -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <label class="form-label fw-bold">Work calendar</label>
+            <div class="calendar-card p-3">
+                <!-- Month / Year wheels INSIDE the calendar -->
+                @{
+                    var currentYear = DateTime.UtcNow.Year;
+                    var startYear = currentYear - 1;
+                    var endYear = currentYear + 1;
+                }
+                <div class="month-year-bar">
+                    <div>
+                        <div class="fw-semibold small text-muted mb-1">Month</div>
+                        <div class="month-wheel">
+                            <select id="monthWheel" class="form-select form-select-lg" size="5">
+                                <option value="01">Jan</option>
+                                <option value="02">Feb</option>
+                                <option value="03">Mar</option>
+                                <option value="04">Apr</option>
+                                <option value="05">May</option>
+                                <option value="06">Jun</option>
+                                <option value="07">Jul</option>
+                                <option value="08">Aug</option>
+                                <option value="09">Sep</option>
+                                <option value="10">Oct</option>
+                                <option value="11">Nov</option>
+                                <option value="12">Dec</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="fw-semibold small text-muted mb-1">Year</div>
+                        <div class="year-wheel">
+                            <select id="yearWheel" class="form-select form-select-lg" size="5">
+                                @for (var y = startYear; y <= endYear; y++)
+                                {
+                                    <option value="@y">@y</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="small text-muted">
+                        Scroll the wheels to choose your month and year.<br />
+                        The calendar below updates automatically.
+                    </div>
+                </div>
+
+                <!-- Weekday header -->
+                <div class="calendar-header">
+                    <div class="weekday">Sun</div>
+                    <div class="weekday">Mon</div>
+                    <div class="weekday">Tue</div>
+                    <div class="weekday">Wed</div>
+                    <div class="weekday">Thu</div>
+                    <div class="weekday">Fri</div>
+                    <div class="weekday">Sat</div>
+                </div>
+
+                <!-- Clickable calendar -->
+                <div id="calendar" class="calendar-grid"></div>
+            </div>
+
+            <div class="form-text mt-2">
+                Click a day to add or update your start/end time for that day. Click again to edit; use the delete
+                button in the table to remove.
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="mb-3">
+                <h5 class="mb-2">Work Summary</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle" id="entriesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th class="text-end">Hours</th>
+                                <th class="text-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody><!-- rows injected by JS --></tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Total Hours</th>
+                                <th class="text-end" id="totalHoursCell">0.00</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- API Quote box -->
+            <div class="mt-3 p-3 border rounded" id="quoteBox" style="display:none;">
+                <h5>Server Quote</h5>
+                <div id="quoteSuccess" class="alert alert-success" style="display:none;"></div>
+                <div id="quoteErrors" class="alert alert-danger" style="display:none;"></div>
+            </div>
+
+            <button type="button" class="btn btn-info mt-2" id="btnGetQuote">
+                Get Quote from Server
+            </button>
+        </div>
+    </div>
+
+    <!-- Next button-->
+    <div class="d-flex gap-2 mt-3">
+        <button id="nextBtn" type="submit" class="btn btn-primary">Next</button>
+    </div>
+</form>
+
+<!-- Modal for entering start/end times -->
+<div class="modal fade" id="timeModal" tabindex="-1" aria-labelledby="timeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" id="timeModalForm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="timeModalLabel">Edit Day</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">
+                    <strong>Date:</strong>
+                    <span id="modalDate"></span>
+                </p>
+                <div class="row g-3 mt-2">
+                    <div class="col-6">
+                        <label for="modalStart" class="form-label">Start time</label>
+                        <input type="time" class="form-control" id="modalStart" required />
+                    </div>
+                    <div class="col-6">
+                        <label for="modalEnd" class="form-label">End time</label>
+                        <input type="time" class="form-control" id="modalEnd" required />
+                    </div>
+                </div>
+                <div class="form-text mt-2">
+                    Hours are calculated automatically from your start and end times.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // --- Simple calendar & entry management (no external libs) ---
+        const calendarEl = document.getElementById('calendar');
+        const monthKeyInput = document.getElementById('monthKeyInput');
+        const entriesTableBody = document.querySelector('#entriesTable tbody');
+        const totalHoursCell = document.getElementById('totalHoursCell');
+        const hoursInput = document.getElementById('hoursInput');
+        const entriesJsonInput = document.getElementById('entriesJson');
+
+        // Rate comes from model (CO-assigned); server enforces anyway
+        const rateFromModel = parseFloat('@(Model?.Rate ?? 0M)');
+
+        // Modal elements
+        let currentDateForModal = null;
+        const timeModalEl = document.getElementById('timeModal');
+        const timeModal = new bootstrap.Modal(timeModalEl);
+        const modalDate = document.getElementById('modalDate');
+        const modalStart = document.getElementById('modalStart');
+        const modalEnd = document.getElementById('modalEnd');
+        const timeModalForm = document.getElementById('timeModalForm');
+
+        // --- Month/year wheel selector → MonthKey binding ---
+        (function () {
+            const monthKeyInputEl = monthKeyInput;
+            const monthWheel = document.getElementById('monthWheel');
+            const yearWheel = document.getElementById('yearWheel');
+
+            if (!monthKeyInputEl || !monthWheel || !yearWheel) {
+                return;
+            }
+
+            function syncFromInput() {
+                const mk = (monthKeyInputEl.value || '').trim();
+                const match = mk.match(/^(\d{4})-(\d{2})$/);
+                if (match) {
+                    yearWheel.value = match[1];
+                    monthWheel.value = match[2];
+                }
+            }
+
+            function syncToInput() {
+                const y = yearWheel.value;
+                const m = monthWheel.value;
+                if (!y || !m) return;
+                monthKeyInputEl.value = y + '-' + m;
+                monthKeyInputEl.dispatchEvent(new Event('change'));
+            }
+
+            monthWheel.addEventListener('change', syncToInput);
+            yearWheel.addEventListener('change', syncToInput);
+
+            // initial sync
+            if (monthKeyInputEl.value) {
+                syncFromInput();
+            } else {
+                const now = new Date();
+                yearWheel.value = String(now.getFullYear());
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                monthWheel.value = mm;
+                syncToInput();
+            }
+        })();
+
+        // Entries structure: { date: 'YYYY-MM-DD', start: 'HH:mm', end: 'HH:mm' }
+        let entries = [];
+
+        function ymdToDate(ymd) {
+            const [y, m, d] = ymd.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function getMonthKeyFromDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).toString().padStart(2, '0');
+            return `${y}-${m}`;
+        }
+
+        function getDayLabel(date) {
+            return date.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+        }
+
+        function getIsoDate(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).toString().padStart(2, '0');
+            const day = String(d.getDate()).toString().padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        function computeHoursForEntry(entry) {
+            if (!entry.start || !entry.end) return 0;
+            const [sh, sm] = entry.start.split(':').map(Number);
+            const [eh, em] = entry.end.split(':').map(Number);
+
+            const startDate = new Date(0, 0, 1, sh, sm);
+            const endDate = new Date(0, 0, 1, eh, em);
+            let diff = (endDate - startDate) / 3600000; // ms to hours
+
+            if (diff < 0) diff = 0;
+            return diff;
+        }
+
+        function computeTotalHours() {
+            return entries.reduce((sum, e) => sum + computeHoursForEntry(e), 0);
+        }
+
+        function getEntriesForMonth(monthKey) {
+            return entries.filter(e => e.date.startsWith(monthKey));
+        }
+
+        function renderCalendar() {
+            const mk = (monthKeyInput.value || '').trim();
+            const match = mk.match(/^(\d{4})-(\d{2})$/);
+            const y = match ? parseInt(match[1], 10) : NaN;
+            const m = match ? parseInt(match[2], 10) : NaN;
+
+            if (isNaN(y) || isNaN(m)) {
+                calendarEl.innerHTML = '<div class="text-muted">Please select a valid month first.</div>';
+                return;
+            }
+
+            const firstDay = new Date(y, m - 1, 1);
+            const startWeekday = firstDay.getDay(); // 0 (Sun) - 6 (Sat)
+            const daysInMonth = new Date(y, m, 0).getDate();
+
+            const today = new Date();
+            const todayKey = getIsoDate(today);
+
+            calendarEl.innerHTML = '';
+
+            // Empty cells before first day
+            for (let i = 0; i < startWeekday; i++) {
+                const emptyCell = document.createElement('button');
+                emptyCell.type = 'button';
+                emptyCell.className = 'day-cell empty btn btn-light';
+                emptyCell.disabled = true;
+                calendarEl.appendChild(emptyCell);
+            }
+
+            const monthEntries = getEntriesForMonth(mk);
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(y, m - 1, day);
+                const iso = getIsoDate(date);
+                const isToday = iso === todayKey;
+
+                const cell = document.createElement('button');
+                cell.type = 'button';
+                cell.className = 'day-cell btn btn-outline-light';
+                if (isToday) cell.classList.add('is-today');
+
+                const dayNumber = document.createElement('span');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+
+                const entry = monthEntries.find(e => e.date === iso);
+                const timeInfo = document.createElement('div');
+                timeInfo.className = 'day-time';
+
+                const pill = document.createElement('span');
+                pill.className = 'status-pill';
+
+                if (entry) {
+                    const hours = computeHoursForEntry(entry);
+                    cell.classList.add('btn-success');
+                    dayNumber.classList.add('badge-success');
+                    pill.classList.add('has-entry');
+                    pill.textContent = `${hours.toFixed(2)} h`;
+
+                    timeInfo.textContent = `${entry.start} – ${entry.end}`;
+                } else {
+                    pill.textContent = 'No hours';
+                    timeInfo.textContent = 'Click to add hours';
+                }
+
+                cell.appendChild(dayNumber);
+                cell.appendChild(pill);
+                cell.appendChild(timeInfo);
+
+                cell.addEventListener('click', () => openModalForDate(iso));
+
+                calendarEl.appendChild(cell);
+            }
+        }
+
+        function renderEntriesTable() {
+            entriesTableBody.innerHTML = '';
+
+            const mk = (monthKeyInput.value || '').trim();
+            const monthEntries = getEntriesForMonth(mk);
+
+            monthEntries.sort((a, b) => a.date.localeCompare(b.date));
+
+            for (const e of monthEntries) {
+                const tr = document.createElement('tr');
+                const hours = computeHoursForEntry(e);
+
+                const dateTd = document.createElement('td');
+                dateTd.textContent = getDayLabel(ymdToDate(e.date));
+
+                const startTd = document.createElement('td');
+                startTd.textContent = e.start || '—';
+
+                const endTd = document.createElement('td');
+                endTd.textContent = e.end || '—';
+
+                const hoursTd = document.createElement('td');
+                hoursTd.className = 'text-end';
+                hoursTd.textContent = hours.toFixed(2);
+
+                const actionsTd = document.createElement('td');
+                actionsTd.className = 'text-end';
+
+                const editBtn = document.createElement('button');
+                editBtn.type = 'button';
+                editBtn.className = 'btn btn-sm btn-outline-primary me-1';
+                editBtn.textContent = 'Edit';
+                editBtn.addEventListener('click', () => openModalForDate(e.date));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'btn btn-sm btn-outline-danger';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    entries = entries.filter(x => x.date !== e.date);
+                    syncUi();
+                });
+
+                actionsTd.appendChild(editBtn);
+                actionsTd.appendChild(deleteBtn);
+
+                tr.appendChild(dateTd);
+                tr.appendChild(startTd);
+                tr.appendChild(endTd);
+                tr.appendChild(hoursTd);
+                tr.appendChild(actionsTd);
+
+                entriesTableBody.appendChild(tr);
+            }
+
+            const totalHours = computeTotalHours();
+            totalHoursCell.textContent = totalHours.toFixed(2);
+
+            hoursInput.value = totalHours.toFixed(2);
+            entriesJsonInput.value = JSON.stringify(entries);
+        }
+
+        function syncUi() {
+            renderCalendar();
+            renderEntriesTable();
+        }
+
+        monthKeyInput.addEventListener('change', () => {
+            const mk = (monthKeyInput.value || '').trim();
+            const match = mk.match(/^(\d{4})-(\d{2})$/);
+            const y = match ? parseInt(match[1], 10) : NaN;
+            const m = match ? parseInt(match[2], 10) : NaN;
+
+            if (!isNaN(y) && !isNaN(m)) {
+                entries = entries.filter(e => e.date.startsWith(mk));
+            }
+
+            syncUi();
+        });
+
+        function openModalForDate(isoDate) {
+            currentDateForModal = isoDate;
+            const dateObj = ymdToDate(isoDate);
+
+            modalDate.textContent = getDayLabel(dateObj);
+
+            const existing = entries.find(e => e.date === isoDate);
+
+            modalStart.value = existing?.start ?? '08:00';
+            modalEnd.value = existing?.end ?? '10:00';
+
+            timeModal.show();
+        }
+
+        timeModalForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const start = modalStart.value;
+            const end = modalEnd.value;
+
+            if (!start || !end) {
+                alert('Please provide both start and end times.');
+                return;
+            }
+
+            const candidate = { date: currentDateForModal, start, end };
+            const hours = computeHoursForEntry(candidate);
+            if (hours <= 0) {
+                alert('End time must be after start time.');
+                return;
+            }
+
+            const existingIndex = entries.findIndex(e => e.date === currentDateForModal);
+            if (existingIndex >= 0) {
+                entries[existingIndex] = candidate;
+            } else {
+                entries.push(candidate);
+            }
+
+            timeModal.hide();
+            syncUi();
+        });
+
+        // Initialize default month (if MonthKey is empty)
+        (function initMonthKey() {
+            if ((monthKeyInput.value || '').trim() === '') {
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).toString().padStart(2, '0');
+                monthKeyInput.value = `${y}-${m}`;
+            }
+
+            syncUi();
+        })();
+
+        // === API-driven claim quote ===
+        (function () {
+            const btn = document.getElementById('btnGetQuote');
+            const box = document.getElementById('quoteBox');
+            const success = document.getElementById('quoteSuccess');
+            const errors = document.getElementById('quoteErrors');
+
+            if (!btn || !box || !success || !errors) return;
+
+            btn.addEventListener('click', async () => {
+                const hours = parseFloat(hoursInput.value || '0');
+                const mk = (monthKeyInput.value || '').trim();
+
+                box.style.display = 'block';
+                success.style.display = 'none';
+                errors.style.display = 'none';
+                success.innerHTML = '';
+                errors.innerHTML = '';
+
+                if (!mk) {
+                    errors.innerHTML = 'Please select a month first.';
+                    errors.style.display = 'block';
+                    return;
+                }
+
+                if (hours <= 0) {
+                    errors.innerHTML = 'Please add at least one day with hours before requesting a quote.';
+                    errors.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    const resp = await fetch('/api/v1/claims-automation/quote', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector("input[name='__RequestVerificationToken']").value
+                        },
+                        body: JSON.stringify({
+                            monthKey: mk,
+                            hours: hours
+                        })
+                    });
+
+                    if (!resp.ok) {
+                        let message = 'Server returned an error.';
+
+                        try {
+                            const data = await resp.json();
+                            if (data.errors && Array.isArray(data.errors)) {
+                                message = data.errors.join('<br>');
+                            } else if (data.error) {
+                                message = data.error;
+                            }
+                        } catch {
+                            const text = await resp.text();
+                            if (text) {
+                                message = text;
+                            }
+                        }
+
+                        errors.innerHTML = message;
+                        errors.style.display = 'block';
+                        return;
+                    }
+
+                    const data = await resp.json();
+                    success.innerHTML =
+                        `<strong>Server quote:</strong><br>
+                             <strong>Month:</strong> ${data.monthKey}<br>
+                             <strong>Hours:</strong> ${data.hours}<br>
+                             <strong>Rate:</strong> R ${data.rate}<br>
+                             <strong>Amount:</strong> R ${data.amount}`;
+
+                    success.style.display = 'block';
+
+                } catch (err) {
+                    console.error('[Create] Quote error:', err);
+                    errors.innerHTML = 'Could not connect to the server.';
+                    errors.style.display = 'block';
+                }
+            });
+        })();
+    </script>
+}

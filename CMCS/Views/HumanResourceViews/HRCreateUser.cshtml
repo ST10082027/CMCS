@@ -1,0 +1,108 @@
+@model CMCS.Controllers.HumanResourceControllers.HRUserEditViewModel
+
+@{
+    var isCreate = string.IsNullOrWhiteSpace(Model?.Id);
+    ViewData["Title"] = isCreate ? "Create User" : "Edit User";
+}
+
+<div class="container py-4" style="max-width: 720px;">
+    <h3 class="mb-3">@ViewData["Title"]</h3>
+
+    <form asp-action="@(isCreate ? "Create" : "Edit")" method="post" novalidate>
+        @Html.AntiForgeryToken()
+
+        @if (!string.IsNullOrWhiteSpace(Model?.Id))
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="UserName" class="form-label"></label>
+            <input asp-for="UserName" class="form-control" />
+            <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 mt-3">
+            <label asp-for="PhoneNumber" class="form-label"></label>
+            <input asp-for="PhoneNumber" class="form-control" />
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 mt-3">
+            <label asp-for="Role" class="form-label"></label>
+            <select asp-for="Role" class="form-select" id="roleSelect">
+                <option value="Lecturer">Lecturer</option>
+                <option value="Coordinator">Coordinator</option>
+                <option value="AcademicManager">Academic Manager</option>
+                <option value="HR">HR</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
+
+        <div id="hourlyRateGroup" class="mb-3" style="display:none;">
+            <label asp-for="HourlyRate" class="form-label"></label>
+            <input asp-for="HourlyRate" class="form-control" />
+            <span class="form-text">Only required for Lecturers (IC users).</span>
+            <span asp-validation-for="HourlyRate" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" />
+            <span class="form-text">
+                @(isCreate
+                    ? "Initial password for the new user."
+                    : "Leave blank to keep the existing password.")
+            </span>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                @(isCreate ? "Create" : "Save changes")
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var sel = document.getElementById('roleSelect');
+            var rateGroup = document.getElementById('hourlyRateGroup');
+
+            function toggleRate() {
+                if (!sel || !rateGroup) return;
+                rateGroup.style.display = sel.value === 'Lecturer' ? 'block' : 'none';
+            }
+
+            if (sel) {
+                sel.addEventListener('change', toggleRate);
+                toggleRate();
+            }
+        })();
+    </script>
+}

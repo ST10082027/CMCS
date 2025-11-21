@@ -1,0 +1,172 @@
+@model IEnumerable<CMCS.Models.MonthlyClaim>
+
+@{
+    ViewData["Title"] = "Pending Claims";
+    var pendingCount = Model?.Count() ?? 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+        <small class="text-muted">
+            Review and approve independent contractor monthly claims.
+        </small>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-primary rounded-pill px-3 py-2">
+            @pendingCount @((pendingCount == 1) ? "claim" : "claims") awaiting approval
+        </span>
+    </div>
+</div>
+
+@if (pendingCount == 0)
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center py-5">
+            <h5 class="mb-2">No pending claims 🎉</h5>
+            <p class="text-muted mb-0">
+                There are currently no claims waiting for your approval.
+                As soon as lecturers submit new claims, they will appear here.
+            </p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-0 pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-1">Pending claims</h5>
+                <small class="text-muted">
+                    Click <strong>Approve</strong> to finalise, or <strong>Reject</strong> with a short reason.
+                </small>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Lecturer</th>
+                            <th scope="col">Month</th>
+                            <th scope="col" class="text-end">Hours</th>
+                            <th scope="col" class="text-end">Rate</th>
+                            <th scope="col" class="text-end">Amount</th>
+                            <th scope="col" class="text-center">Docs</th>
+                            <th scope="col">Submitted</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">
+                                        @c.IcUser?.Email
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @c.MonthKey
+                                    </span>
+                                </td>
+
+                                <td class="text-end">
+                                    @c.Hours
+                                </td>
+
+                                <td class="text-end">
+                                    @c.Rate.ToString("0.00")
+                                </td>
+
+                                <td class="text-end fw-semibold">
+                                    @c.Amount.ToString("0.00")
+                                </td>
+
+                                <td class="text-center">
+                                    @if (c.Documents != null && c.Documents.Any())
+                                    {
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                    type="button"
+                                                    data-bs-toggle="dropdown">
+                                                @c.Documents.Count @((c.Documents.Count == 1) ? "file" : "files")
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                @foreach (var d in c.Documents)
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           asp-controller="Claims"
+                                                           asp-action="DownloadDocument"
+                                                           asp-route-id="@d.Id">
+                                                            @d.FileName
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted">No docs</span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (c.SubmittedAt.HasValue)
+                                    {
+                                        <div class="small">
+                                            @c.SubmittedAt.Value.ToLocalTime().ToString("ddd, dd MMM yyyy HH:mm")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Not available</span>
+                                    }
+                                </td>
+
+                                <td class="text-end">
+                                    <form asp-action="Approve"
+                                          asp-route-id="@c.Id"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit"
+                                                class="btn btn-sm btn-success me-1">
+                                            Approve
+                                        </button>
+                                    </form>
+
+                                    <form asp-action="Reject"
+                                          asp-route-id="@c.Id"
+                                          method="post"
+                                          class="d-inline-flex align-items-center gap-1">
+                                        @Html.AntiForgeryToken()
+                                        <input type="text"
+                                               name="remark"
+                                               placeholder="Reason…"
+                                               class="form-control form-control-sm"
+                                               style="max-width: 190px;" />
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger">
+                                            Reject
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-white border-0 text-muted small">
+            Showing @pendingCount pending @((pendingCount == 1) ? "claim" : "claims").
+        </div>
+    </div>
+}

@@ -1,50 +1,37 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using CMCS.Data;
-using CMCS.Infrastructure;
-using System.Security.Cryptography;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// === Console logging on ===
+// === Logging ===
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
-// MVC
+// === MVC / Controllers ===
 builder.Services.AddControllersWithViews();
 
-// EF Core + SQLite
+// === EF Core / SQLite ===
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity + Roles + Tokens
-builder.Services
-    .AddIdentity<ApplicationUser, IdentityRole>(options =>
-    {
-        // Sign-in rules
-        options.SignIn.RequireConfirmedAccount = false;
-        options.SignIn.RequireConfirmedEmail = false;
-
-        // Password rules (relaxed for demo/testing)
-        options.Password.RequiredLength = 6;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireDigit = false;
-    })
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
-// log every action enter/exit
-builder.Services.AddControllersWithViews(options =>
+// === Session ===
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
 {
-    options.Filters.Add<ActionLoggingFilter>();
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
+
+// === Swagger / OpenAPI ===
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Pipeline
+// === HTTP pipeline ===
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -53,43 +40,39 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
-app.UseAuthentication();
+
+app.UseSession();
 app.UseAuthorization();
 
-// Default route -> Login
+// Swagger UI – left on in all environments so it’s easy to demo
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "CMCS API v1");
+    c.RoutePrefix = "swagger"; // URL: /swagger
+});
+
+// === MVC routing ===
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
-// Migrate + seed roles/users
+// === Seed default users ===
 using (var scope = app.Services.CreateScope())
 {
     var sp = scope.ServiceProvider;
-    var logger = sp.GetRequiredService<ILogger<Program>>();
+    var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+    var logger = loggerFactory.CreateLogger("SeedUsers");
 
-    // Apply any pending migrations
     try
     {
-        var db = sp.GetRequiredService<ApplicationDbContext>();
-        await db.Database.MigrateAsync();
-        logger.LogInformation("Database migrated successfully.");
+        await SeedUsers.InitializeAsync(sp, logger);
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Error running migrations.");
-        throw;
-    }
-
-    // Seed roles and default users
-    try
-    {
-        await SeedIdentity.InitializeAsync(sp, logger);
-        logger.LogInformation("Identity seeded successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error seeding identity.");
+        logger.LogError(ex, "Error seeding users.");
         throw;
     }
 }

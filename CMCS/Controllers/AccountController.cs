@@ -1,95 +1,125 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using CMCS.Models;
 using CMCS.Data;
+using CMCS.Infrastructure;
+using CMCS.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CMCS.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _db;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        public AccountController(ApplicationDbContext db, ILogger<AccountController> logger)
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
+            _db = db;
+            _logger = logger;
         }
 
+        // ========= LOGIN (GET) =========
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
+            if (!string.IsNullOrEmpty(HttpContext.Session.GetString("UserId")))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             ViewData["ReturnUrl"] = returnUrl;
-            return View(new LoginViewModel());
+            return View("~/Views/GenericViews/Login.cshtml", new LoginViewModel());
         }
 
+        // ========= LOGIN (POST) =========
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
-            if (!ModelState.IsValid) return View(model);
+            ViewData["ReturnUrl"] = returnUrl;
 
-            // Support username == email for convenience
-            var user = await _userManager.FindByNameAsync(model.Username)
-                       ?? await _userManager.FindByEmailAsync(model.Username);
-
-            if (user == null)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "Invalid username or password.");
-                return View(model);
+                return View("~/Views/GenericViews/Login.cshtml", model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                user.UserName!,
-                model.Password,
-                isPersistent: false,
-                lockoutOnFailure: false
-            );
+            var user = await _db.Users
+                .FirstOrDefaultAsync(u =>
+                    u.UserName == model.Username || u.Email == model.Username);
 
-            if (!result.Succeeded)
+            if (user == null || !PasswordHelper.VerifyPassword(model.Password, user.PasswordHash))
             {
                 ModelState.AddModelError(string.Empty, "Invalid username or password.");
-                return View(model);
+                return View("~/Views/GenericViews/Login.cshtml", model);
             }
 
-            // If a local returnUrl was provided, prefer it
+            HttpContext.Session.SetString("UserId", user.Id);
+            HttpContext.Session.SetString("UserEmail", user.Email);
+            HttpContext.Session.SetString("UserRole", user.Role);
+            HttpContext.Session.SetString("UserFullName", $"{user.FirstName} {user.LastName}");
+
+            _logger.LogInformation("User {UserName} logged in with role {Role}", user.UserName, user.Role);
+
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
 
-            // Role-based landing pages (aligns with existing controllers)
-            if (await _userManager.IsInRoleAsync(user, "IC"))
+            return user.Role switch
             {
-                return RedirectToAction("My", "Claims");
-            }
-            if (await _userManager.IsInRoleAsync(user, "MR"))
-            {
-                return RedirectToAction("ReviewQueue", "Claims");
-            }
-            if (await _userManager.IsInRoleAsync(user, "CO"))
-            {
-                return RedirectToAction("All", "Claims");
-            }
+                "Lecturer" => RedirectToAction("Index", "LecturerDashboard"),
+                "Coordinator" => RedirectToAction("Index", "ProgrammeCoordinatorDashboard"),
+                "AcademicManager" => RedirectToAction("Index", "AcademicManagerDashboard"),
+                "HR" => RedirectToAction("Index", "HRDashboard"),
+                _ => RedirectToAction("Index", "Home")
+            };
 
-            // Fallback
-            return RedirectToAction("Index", "Dashboard");
+
+
         }
 
+        // ========= LOGOUT =========
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
-            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User {UserId} logged out.", HttpContext.Session.GetString("UserId"));
+            HttpContext.Session.Clear();
             return RedirectToAction(nameof(Login));
         }
 
+        // ========= ACCESS DENIED =========
         [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Exit() => View();
+        public IActionResult AccessDenied()
+        {
+            return View("~/Views/GenericViews/AccessDenied.cshtml");
+        }
+
+        [HttpGet]
+        public IActionResult Exit()
+        {
+            // HTML to close the browser window
+            var html = @"<html>
+                    <body>
+                        <script>
+                            window.onunload = function() {
+                                window.close();     // Attempt to close the tab
+                            };
+                            window.close();         // Immediate attempt
+                            setTimeout(function() { window.location.href='about:blank'; }, 500);
+                        </script>
+                        <p>You may now close this tab.</p>
+                    </body>
+                 </html>";
+
+            // Schedule application shutdown AFTER response is sent
+            Task.Run(async () =>
+            {
+                await Task.Delay(1000);
+                Environment.Exit(0);
+            });
+
+            return Content(html, "text/html");
+        }
+
     }
 }

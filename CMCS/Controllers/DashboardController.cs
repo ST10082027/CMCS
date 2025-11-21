@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
+using CMCS.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMCS.Controllers
 {
-    [Authorize]
+    [SessionAuthorize] // any logged-in user
     public class DashboardController : Controller
     {
         public IActionResult Index()

@@ -1,0 +1,71 @@
+@using Microsoft.AspNetCore.Http
+
+@{
+    ViewData["Title"] = "Lecturer Dashboard";
+
+    var session = Context.Session;
+    var fullName = session.GetString("UserFullName") ?? "Lecturer";
+    var role = session.GetString("UserRole") ?? "Lecturer";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="mb-1">Welcome, @fullName</h2>
+            <p class="text-muted mb-0">
+                Role: @role
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Create a new monthly claim</h5>
+                    <p class="card-text text-muted">
+                        Capture your hours for the current month and submit them for verification and approval.
+                    </p>
+                    <a asp-controller="Claims" asp-action="New" class="btn btn-primary">
+                        New Monthly Claim
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">View my claims</h5>
+                    <p class="card-text text-muted">
+                        Track the status of your claims: draft, pending verification, approved or rejected.
+                    </p>
+                    <a asp-controller="Claims" asp-action="My" class="btn btn-outline-secondary">
+                        My Claims
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">How the claim process works</h5>
+                    <p class="card-text text-muted">
+                        Submit your claim with accurate hours and documentation. Your Programme Coordinator
+                        will verify your claim, then your Academic Manager will approve it for payment.
+                        You can track your claim status at any time from the “My Claims” page.
+                    </p>
+                    <ul class="small">
+                        <li>Draft your claim and save it before submission.</li>
+                        <li>Submit when you’re satisfied with your hours and attachments.</li>
+                        <li>Track statuses: Draft → Pending → Verified → Approved / Rejected.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,885 @@
+@model CMCS.Models.MonthlyClaim
+@{
+    ViewData["Title"] = "Edit Claim";
+}
+
+<style>
+    /* ===== Calendar + Month Selector Aesthetics ===== */
+    .calendar-card {
+        border-radius: 1rem;
+        box-shadow: 0 8px 26px rgba(0, 0, 0, .06);
+        border: 1px solid rgba(0, 0, 0, .06);
+        background: #fff;
+    }
+
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: .25rem;
+        padding: .75rem .75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .weekday {
+        text-align: center;
+        font-size: .8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #6c757d;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: .35rem;
+        padding: .75rem;
+        padding-top: .5rem;
+    }
+
+    .day-cell {
+        position: relative;
+        border-radius: .75rem;
+        min-height: 3.25rem;
+        padding: .35rem .4rem;
+        background: #f8f9fa;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: background-color .15s ease, box-shadow .15s ease, border-color .15s ease, transform .06s ease-out;
+    }
+
+    .day-cell:hover {
+        background-color: #f1f3f5;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        transform: translateY(-1px);
+        border-color: #ced4da;
+    }
+
+    .day-cell.empty {
+        background: transparent;
+        border: none;
+        cursor: default;
+        box-shadow: none;
+    }
+
+    .day-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        color: #495057;
+        background: #e9ecef;
+    }
+
+    .day-number.badge-success {
+        background: #198754;
+        color: #fff;
+        box-shadow: 0 0 0 2px rgba(25, 135, 84, .15);
+    }
+
+    .day-number.badge-today {
+        background: #0d6efd;
+        color: #fff;
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, .15);
+    }
+
+    .status-pill {
+        position: absolute;
+        top: .35rem;
+        right: .5rem;
+        font-size: .7rem;
+        padding: .1rem .45rem;
+        border-radius: 999px;
+    }
+
+    .status-pill.badge-light {
+        background-color: rgba(248, 249, 250, .95);
+        border: 1px solid #dee2e6;
+        color: #495057;
+    }
+
+    .status-pill.badge-warning {
+        background-color: rgba(255, 193, 7, .9);
+        color: #212529;
+    }
+
+    .status-pill.badge-danger {
+        background-color: rgba(220, 53, 69, .95);
+        color: #fff;
+    }
+
+    .status-pill.badge-success {
+        background-color: rgba(25, 135, 84, .95);
+        color: #fff;
+    }
+
+    .day-time {
+        margin-top: .15rem;
+        font-size: .8rem;
+        color: #495057;
+    }
+
+    .day-time strong {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .day-note {
+        font-size: .75rem;
+        color: #6c757d;
+        margin-top: .1rem;
+    }
+
+    /* Month wheels */
+    .month-wheel-label {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: .2rem;
+    }
+
+    .month-wheel,
+    .year-wheel {
+        position: relative;
+        flex: 1;
+        max-width: 180px;
+        overflow: hidden;
+    }
+
+    .month-wheel select,
+    .year-wheel select {
+        width: 100%;
+        height: 7.5rem;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        text-align: center;
+        font-size: 1rem;
+        line-height: 1.1;
+        border-radius: .75rem;
+    }
+
+    .month-wheel::before,
+    .month-wheel::after,
+    .year-wheel::before,
+    .year-wheel::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 1.5rem;
+        pointer-events: none;
+    }
+
+    .month-wheel::before,
+    .year-wheel::before {
+        top: 0;
+        background: linear-gradient(to bottom, rgba(248, 249, 250, 1), rgba(248, 249, 250, 0));
+    }
+
+    .month-wheel::after,
+    .year-wheel::after {
+        bottom: 0;
+        background: linear-gradient(to top, rgba(248, 249, 250, 1), rgba(248, 249, 250, 0));
+    }
+
+    /* Entries table */
+    #entriesTable thead th {
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #6c757d;
+        border-bottom-width: 1px;
+    }
+
+    #entriesTable tbody td {
+        vertical-align: middle;
+        font-size: .9rem;
+    }
+
+    .day-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .15rem .5rem;
+        border-radius: 999px;
+        background: #f1f3f5;
+        font-size: .8rem;
+    }
+
+    .day-chip .dot {
+        width: .5rem;
+        height: .5rem;
+        border-radius: 999px;
+        background: #0d6efd;
+    }
+
+    .day-chip .label {
+        font-weight: 600;
+        color: #343a40;
+    }
+
+    .day-chip .muted {
+        color: #6c757d;
+        font-weight: 400;
+    }
+
+    .btn-ghost {
+        border-radius: 999px;
+        padding: .25rem .6rem;
+        font-size: .8rem;
+    }
+
+    .quote-box {
+        border-radius: .75rem;
+        border: 1px dashed #ced4da;
+        padding: .75rem .9rem;
+        background: #f8f9fa;
+        font-size: .9rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quote-box::before {
+        content: "“";
+        position: absolute;
+        font-size: 3rem;
+        color: rgba(13, 110, 253, .1);
+        left: .5rem;
+        top: -.4rem;
+    }
+
+    .quote-text {
+        font-style: italic;
+    }
+
+    .quote-meta {
+        font-size: .8rem;
+        color: #6c757d;
+    }
+
+    .quote-spinner {
+        display: none;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 999px;
+        border: 2px solid rgba(13, 110, 253, .4);
+        border-top-color: transparent;
+        animation: spin 0.7s linear infinite;
+    }
+
+</style>
+
+<h2 class="mb-3">@ViewData["Title"]</h2>
+
+<form id="claimForm" asp-controller="Claims" asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <input type="hidden" asp-for="Id" />
+
+    @* Hidden MonthKey + validation *@
+    <input asp-for="MonthKey" class="form-control d-none" id="monthKeyInput" />
+    <span asp-validation-for="MonthKey" class="text-danger"></span>
+
+    @* Hours & Rate are handled server-side; Hours derived from entries *@
+    <input type="hidden" asp-for="Hours" id="hoursInput" />
+    <input type="hidden" asp-for="Rate" />
+
+    @* Raw entries as JSON for server-side recomputation/validation *@
+    <input type="hidden" id="entriesJson" name="entriesJson" />
+
+    <!-- Calendar + Work Summary side by side -->
+    <div class="row g-4">
+        <!-- Left: Month & Calendar -->
+        <div class="col-lg-7">
+            <div class="calendar-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <div class="text-uppercase text-muted small fw-semibold">Step 1</div>
+                        <h5 class="mb-0">Select month & capture workdays</h5>
+                        <div class="text-muted small">
+                            Use the wheels to pick the claim month. Then click any workday in the calendar to add start and end times.
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="badge bg-light text-muted border">
+                            @Model?.MonthKey
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Month selector wheels -->
+                <div class="d-flex gap-3 mb-3 flex-wrap">
+                    <div class="month-wheel flex-grow-1">
+                        <div class="month-wheel-label">Month</div>
+                        <select id="monthWheel" class="form-select" size="5">
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                            <option value="04">April</option>
+                            <option value="05">May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+
+                    <div class="year-wheel flex-grow-1">
+                        <div class="month-wheel-label">Year</div>
+                        <select id="yearWheel" class="form-select" size="5">
+                            @{
+                                var currentYear = DateTime.UtcNow.Year;
+                                for (int y = currentYear - 2; y <= currentYear + 2; y++)
+                                {
+                                    <option value="@y">@y</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <div class="month-wheel-label">Quick tips</div>
+                        <div class="small text-muted">
+                            <ul class="mb-0 ps-3">
+                                <li>Scroll the wheels to change month & year.</li>
+                                <li>Only dates in the selected month will be counted.</li>
+                                <li>Click a day again to edit or remove its hours.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekday header -->
+                <div class="calendar-header">
+                    <div class="weekday">Sun</div>
+                    <div class="weekday">Mon</div>
+                    <div class="weekday">Tue</div>
+                    <div class="weekday">Wed</div>
+                    <div class="weekday">Thu</div>
+                    <div class="weekday">Fri</div>
+                    <div class="weekday">Sat</div>
+                </div>
+
+                <!-- Calendar grid -->
+                <div id="calendar" class="calendar-grid"></div>
+            </div>
+        </div>
+
+        <!-- Right: Summary + Details -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <div class="text-uppercase text-muted small fw-semibold">Step 2</div>
+                            <h5 class="mb-1">Review your hours</h5>
+                            <p class="text-muted small mb-0">
+                                As you add days, we’ll show a breakdown and total here.
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-light text-muted border">
+                                Rate: R @Model?.Rate.ToString("0.00")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mb-3" style="max-height: 260px; overflow-y: auto;">
+                        <table class="table table-sm align-middle" id="entriesTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th class="text-end">Hours</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Filled dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Totals -->
+                    <div class="border-top pt-2 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="text-muted small">Total captured hours</div>
+                            <div class="fw-semibold" id="totalHoursCell">0</div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                            <span>Estimated amount (R)</span>
+                            <span id="estimatedAmountCell">0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Quote box -->
+                    <div class="quote-box mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="quote-text mb-1" id="quoteText">
+                                    “A well-planned claim means less back and forth and faster payment.”
+                                </div>
+                                <div class="quote-meta">
+                                    <span id="quoteAuthor">CMCS Assistant</span>
+                                </div>
+                            </div>
+                            <div class="quote-spinner" id="quoteSpinner"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="small text-muted">
+                            When you’re happy with your hours for this month, click <strong>Save changes</strong>.
+                            You can still submit later from the Review screen.
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2 mt-auto">
+                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ghost" id="btnClearAll">
+                            Clear all days
+                        </button>
+
+                        <div id="quoteError" class="alert alert-danger small mb-0 flex-grow-1" style="display:none;"></div>
+                    </div>
+
+                    <button type="button" class="btn btn-info mt-2" id="btnGetQuote">
+                        Get Quote from Server
+                    </button>
+                </div>
+            </div>
+
+            <!-- Save / Cancel buttons -->
+            <div class="d-flex gap-2 mt-3">
+                <button id="nextBtn" type="submit" class="btn btn-primary">Save changes</button>
+                <a asp-action="My" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Modal for entering start/end times -->
+<div class="modal fade" id="timeModal" tabindex="-1" aria-labelledby="timeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="timeModalForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="timeModalLabel">Set hours for <span id="modalDate"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label">Start time</label>
+                            <input type="time" id="modalStart" class="form-control" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">End time</label>
+                            <input type="time" id="modalEnd" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-text">
+                        Use 24-hour format. Hours will be calculated automatically.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save day</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // --- Simple calendar & entry management (no external libs) ---
+        const calendarEl = document.getElementById('calendar');
+        const monthKeyInput = document.getElementById('monthKeyInput');
+        const entriesTableBody = document.querySelector('#entriesTable tbody');
+        const totalHoursCell = document.getElementById('totalHoursCell');
+        const hoursInput = document.getElementById('hoursInput');
+        const entriesJsonInput = document.getElementById('entriesJson');
+
+        // Rate comes from model (CO-assigned); server enforces anyway
+        const rateFromModel = parseFloat('@(Model?.Rate ?? 0M)');
+
+        // Modal elements
+        let currentDateForModal = null;
+        const timeModalEl = document.getElementById('timeModal');
+        const timeModal = new bootstrap.Modal(timeModalEl);
+        const modalDate = document.getElementById('modalDate');
+        const modalStart = document.getElementById('modalStart');
+        const modalEnd = document.getElementById('modalEnd');
+        const timeModalForm = document.getElementById('timeModalForm');
+
+        // --- Month/year wheel selector → MonthKey binding ---
+        (function () {
+            const monthKeyInputEl = document.getElementById('monthKeyInput');
+            const monthWheel = document.getElementById('monthWheel');
+            const yearWheel = document.getElementById('yearWheel');
+
+            if (!monthKeyInputEl || !monthWheel || !yearWheel) {
+                return;
+            }
+
+            function syncFromInput() {
+                const mk = (monthKeyInputEl.value || '').trim();
+                const match = mk.match(/^(\d{4})-(\d{2})$/);
+                if (match) {
+                    yearWheel.value = match[1];
+                    monthWheel.value = match[2];
+                }
+            }
+
+            function syncToInput() {
+                const y = yearWheel.value;
+                const m = monthWheel.value;
+                if (!y || !m) return;
+                monthKeyInputEl.value = y + '-' + m;
+                monthKeyInputEl.dispatchEvent(new Event('change'));
+            }
+
+            monthWheel.addEventListener('change', syncToInput);
+            yearWheel.addEventListener('change', syncToInput);
+
+            // initial sync
+            if (monthKeyInputEl.value) {
+                syncFromInput();
+            } else {
+                const now = new Date();
+                yearWheel.value = String(now.getFullYear());
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                monthWheel.value = mm;
+                syncToInput();
+            }
+        })();
+
+        // Entries structure: { date: 'YYYY-MM-DD', start: 'HH:mm', end: 'HH:mm' }
+        let entries = [];
+
+        function ymdToDate(ymd) {
+            const [y, m, d] = ymd.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function getMonthKeyFromDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).toString().padStart(2, '0');
+            return `${y}-${m}`;
+        }
+
+        function getDayLabel(date) {
+            return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        function computeHoursForEntry(entry) {
+            if (!entry.start || !entry.end) return 0;
+            const [sh, sm] = entry.start.split(':').map(Number);
+            const [eh, em] = entry.end.split(':').map(Number);
+
+            const startDate = new Date(0, 0, 1, sh, sm);
+            const endDate = new Date(0, 0, 1, eh, em);
+            let diff = (endDate - startDate) / 3600000; // ms to hours
+
+            if (diff < 0) diff = 0;
+            return diff;
+        }
+
+        function rebuildCalendar() {
+            if (!calendarEl) return;
+
+            const mk = (monthKeyInput.value || '').trim();
+            const match = mk.match(/^(\d{4})-(\d{2})$/);
+            if (!match) {
+                calendarEl.innerHTML = '<div class="text-muted small">Select a valid month first.</div>';
+                return;
+            }
+
+            const year = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10) - 1; // zero-based
+            const firstOfMonth = new Date(year, month, 1);
+            const startDayOfWeek = firstOfMonth.getDay(); // 0=Sun
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            calendarEl.innerHTML = '';
+
+            const today = new Date();
+            const todayY = today.getFullYear();
+            const todayM = today.getMonth();
+            const todayD = today.getDate();
+
+            const dayEntryMap = {};
+            for (const e of entries) {
+                const entryDate = ymdToDate(e.date);
+                dayEntryMap[e.date] = dayEntryMap[e.date] || [];
+                dayEntryMap[e.date].push(e);
+            }
+
+            const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+            for (let cellIndex = 0; cellIndex < totalCells; cellIndex++) {
+                const cell = document.createElement('button');
+                cell.type = 'button';
+                cell.className = 'day-cell btn btn-sm';
+
+                const dayNumber = document.createElement('span');
+                dayNumber.className = 'day-number';
+                const timeInfo = document.createElement('div');
+                timeInfo.className = 'day-time';
+
+                const pill = document.createElement('span');
+                pill.className = 'status-pill badge badge-light';
+
+                if (cellIndex < startDayOfWeek || cellIndex >= startDayOfWeek + daysInMonth) {
+                    cell.classList.add('empty');
+                    cell.disabled = true;
+                    calendarEl.appendChild(cell);
+                    continue;
+                }
+
+                const day = cellIndex - startDayOfWeek + 1;
+                const date = new Date(year, month, day);
+                const ymd = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                dayNumber.textContent = day;
+
+                if (year === todayY && month === todayM && day === todayD) {
+                    dayNumber.classList.add('badge-today');
+                }
+
+                const dayEntries = dayEntryMap[ymd] || [];
+                let hoursForDay = 0;
+                for (const e of dayEntries) {
+                    hoursForDay += computeHoursForEntry(e);
+                }
+
+                if (hoursForDay > 0) {
+                    dayNumber.classList.add('badge-success');
+                    timeInfo.innerHTML = `<strong>${hoursForDay.toFixed(1)}</strong> hrs`;
+                } else {
+                    timeInfo.innerHTML = '<span class="text-muted small">No hours</span>';
+                }
+
+                let pillText = 'No hours';
+                let pillClass = 'badge-light';
+                if (hoursForDay === 0) {
+                    pillText = 'No hours';
+                    pillClass = 'badge-light';
+                } else if (hoursForDay < 4) {
+                    pillText = 'Short day';
+                    pillClass = 'badge-warning';
+                } else if (hoursForDay <= 8) {
+                    pillText = 'Full day';
+                    pillClass = 'badge-success';
+                } else {
+                    pillText = 'Over 8 hrs';
+                    pillClass = 'badge-danger';
+                }
+                pill.textContent = pillText;
+                pill.className = 'status-pill badge ' + pillClass;
+
+                const dayNote = document.createElement('div');
+                dayNote.className = 'day-note';
+                dayNote.textContent = getDayLabel(date);
+
+                cell.appendChild(dayNumber);
+                cell.appendChild(timeInfo);
+                cell.appendChild(pill);
+                cell.appendChild(dayNote);
+
+                cell.addEventListener('click', () => {
+                    openTimeModal(ymd);
+                });
+
+                calendarEl.appendChild(cell);
+            }
+
+            rebuildEntriesTable();
+            recalcTotals();
+        }
+
+        function rebuildEntriesTable() {
+            if (!entriesTableBody) return;
+            entriesTableBody.innerHTML = '';
+
+            const sorted = [...entries].sort((a, b) => {
+                const da = ymdToDate(a.date).getTime();
+                const db = ymdToDate(b.date).getTime();
+                return da - db;
+            });
+
+            for (const e of sorted) {
+                const tr = document.createElement('tr');
+
+                const dateTd = document.createElement('td');
+                dateTd.textContent = e.date;
+
+                const startTd = document.createElement('td');
+                startTd.textContent = e.start || '-';
+
+                const endTd = document.createElement('td');
+                endTd.textContent = e.end || '-';
+
+                const hoursTd = document.createElement('td');
+                hoursTd.className = 'text-end';
+                const hrs = computeHoursForEntry(e);
+                hoursTd.textContent = hrs.toFixed(1);
+
+                const actionsTd = document.createElement('td');
+                actionsTd.className = 'text-end';
+
+                const editBtn = document.createElement('button');
+                editBtn.type = 'button';
+                editBtn.className = 'btn btn-sm btn-outline-primary btn-ghost me-1';
+                editBtn.textContent = 'Edit';
+                editBtn.addEventListener('click', () => openTimeModal(e.date));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'btn btn-sm btn-outline-danger btn-ghost';
+                deleteBtn.textContent = 'Remove';
+                deleteBtn.addEventListener('click', () => {
+                    entries = entries.filter(x => !(x.date === e.date && x.start === e.start && x.end === e.end));
+                    rebuildCalendar();
+                });
+
+                actionsTd.appendChild(editBtn);
+                actionsTd.appendChild(deleteBtn);
+
+                tr.appendChild(dateTd);
+                tr.appendChild(startTd);
+                tr.appendChild(endTd);
+                tr.appendChild(hoursTd);
+                tr.appendChild(actionsTd);
+
+                entriesTableBody.appendChild(tr);
+            }
+        }
+
+        function recalcTotals() {
+            let total = 0;
+            for (const e of entries) {
+                total += computeHoursForEntry(e);
+            }
+            totalHoursCell.textContent = total.toFixed(1);
+            hoursInput.value = total.toFixed(1);
+
+            const estimatedAmountCell = document.getElementById('estimatedAmountCell');
+            if (estimatedAmountCell) {
+                const amount = rateFromModel * total;
+                estimatedAmountCell.textContent = amount.toFixed(2);
+            }
+
+            entriesJsonInput.value = JSON.stringify(entries);
+        }
+
+        function openTimeModal(ymd) {
+            currentDateForModal = ymd;
+            modalDate.textContent = ymd;
+
+            const existing = entries.find(e => e.date === ymd);
+            if (existing) {
+                modalStart.value = existing.start || '';
+                modalEnd.value = existing.end || '';
+            } else {
+                modalStart.value = '';
+                modalEnd.value = '';
+            }
+
+            timeModal.show();
+        }
+
+        timeModalForm.addEventListener('submit', function (evt) {
+            evt.preventDefault();
+            if (!currentDateForModal) return;
+
+            const start = modalStart.value;
+            const end = modalEnd.value;
+
+            if (!start || !end) {
+                alert('Please provide both start and end times.');
+                return;
+            }
+
+            const [sh, sm] = start.split(':').map(Number);
+            const [eh, em] = end.split(':').map(Number);
+            const s = new Date(0, 0, 1, sh, sm);
+            const e = new Date(0, 0, 1, eh, em);
+            if (e <= s) {
+                alert('End time must be after start time.');
+                return;
+            }
+
+            entries = entries.filter(e => e.date !== currentDateForModal);
+            entries.push({
+                date: currentDateForModal,
+                start: start,
+                end: end
+            });
+
+            timeModal.hide();
+            rebuildCalendar();
+        });
+
+        document.getElementById('btnClearAll')?.addEventListener('click', function () {
+            if (!confirm('Clear all captured days for this month?')) {
+                return;
+            }
+            entries = [];
+            rebuildCalendar();
+        });
+
+        monthKeyInput.addEventListener('change', function () {
+            rebuildCalendar();
+        });
+
+        rebuildCalendar();
+
+        const btnGetQuote = document.getElementById('btnGetQuote');
+        const quoteText = document.getElementById('quoteText');
+        const quoteAuthor = document.getElementById('quoteAuthor');
+        const quoteSpinner = document.getElementById('quoteSpinner');
+        const quoteError = document.getElementById('quoteError');
+
+        if (btnGetQuote && quoteText && quoteAuthor && quoteSpinner && quoteError) {
+            btnGetQuote.addEventListener('click', async () => {
+                quoteError.style.display = 'none';
+                quoteSpinner.style.display = 'inline-block';
+
+                try {
+                    const response = await fetch('/api/quotes');
+                    if (!response.ok) {
+                        throw new Error('Server returned an error.');
+                    }
+                    const data = await response.json();
+                    quoteText.textContent = data.text || 'No quote available right now.';
+                    quoteAuthor.textContent = data.author || 'Unknown';
+                } catch (err) {
+                    console.error('[Edit] Quote error:', err);
+                    quoteError.textContent = 'Could not fetch a quote right now. Please try again later.';
+                    quoteError.style.display = 'block';
+                } finally {
+                    quoteSpinner.style.display = 'none';
+                }
+            });
+        }
+
+        const claimForm = document.getElementById('claimForm');
+        if (claimForm) {
+            claimForm.addEventListener('submit', function () {
+                recalcTotals();
+            });
+        }
+    </script>
+}

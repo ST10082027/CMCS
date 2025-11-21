@@ -1,0 +1,586 @@
+@model CMCS.Models.MonthlyClaim
+@{
+    ViewData["Title"] = "Review Claim";
+
+    var lecturer = Model.IcUser;
+}
+
+<style>
+    /* ===== Calendar + Layout Aesthetics (read-only) ===== */
+    .calendar-card {
+        border-radius: 1rem;
+        box-shadow: 0 8px 26px rgba(0, 0, 0, .06);
+        border: 1px solid rgba(0, 0, 0, .06);
+        background: #fff;
+    }
+
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: .25rem;
+        padding: .75rem .75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .weekday {
+        text-align: center;
+        font-size: .8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #6c757d;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: .35rem;
+        padding: .75rem;
+        padding-top: .5rem;
+    }
+
+    .day-cell {
+        position: relative;
+        border-radius: .75rem;
+        min-height: 3.25rem;
+        padding: .35rem .4rem;
+        background: #f8f9fa;
+        border: 1px solid transparent;
+        transition: background-color .15s ease, box-shadow .15s ease, border-color .15s ease;
+        cursor: default;
+    }
+
+    .day-cell.empty {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    .day-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: .85rem;
+        color: #495057;
+        background: #e9ecef;
+    }
+
+    .day-number.badge-success {
+        background: #198754;
+        color: #fff;
+        box-shadow: 0 0 0 2px rgba(25, 135, 84, .15);
+    }
+
+    .day-number.badge-today {
+        background: #0d6efd;
+        color: #fff;
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, .15);
+    }
+
+    .status-pill {
+        position: absolute;
+        top: .35rem;
+        right: .5rem;
+        font-size: .7rem;
+        padding: .1rem .45rem;
+        border-radius: 999px;
+    }
+
+    .status-pill.badge-light {
+        background-color: rgba(248, 249, 250, .95);
+        border: 1px solid #dee2e6;
+        color: #495057;
+    }
+
+    .status-pill.badge-warning {
+        background-color: rgba(255, 193, 7, .9);
+        color: #212529;
+    }
+
+    .status-pill.badge-danger {
+        background-color: rgba(220, 53, 69, .95);
+        color: #fff;
+    }
+
+    .status-pill.badge-success {
+        background-color: rgba(25, 135, 84, .95);
+        color: #fff;
+    }
+
+    .day-time {
+        margin-top: .15rem;
+        font-size: .8rem;
+        color: #495057;
+    }
+
+    .day-time strong {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .day-note {
+        font-size: .75rem;
+        color: #6c757d;
+        margin-top: .1rem;
+    }
+
+    #entriesTable thead th {
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #6c757d;
+        border-bottom-width: 1px;
+    }
+
+    #entriesTable tbody td {
+        vertical-align: middle;
+        font-size: .9rem;
+    }
+
+    .claim-meta-label {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .decision-card textarea {
+        font-size: .9rem;
+    }
+</style>
+
+<div class="container my-4">
+    <div class="mb-3">
+        <a asp-action="Queue" class="btn btn-link btn-sm px-0">
+            &larr; Back to queue
+        </a>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <div class="text-uppercase text-muted small fw-semibold">Programme Coordinator</div>
+            <h2 class="h4 mb-0">Review claim for @lecturer?.FirstName @lecturer?.LastName</h2>
+            <div class="text-muted small">
+                Month: <strong>@Model.MonthKey</strong> &middot;
+                Status: <span class="badge bg-secondary">@Model.Status</span>
+            </div>
+        </div>
+        <div class="text-end">
+            <div class="claim-meta-label">Total captured hours</div>
+            <div class="fs-5 fw-semibold">@Model.Hours.ToString("0.0") hrs</div>
+            @if (Model.SubmittedAt.HasValue)
+            {
+                <div class="text-muted small">
+                    Submitted: @Model.SubmittedAt.Value.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- LEFT: Calendar + breakdown + docs -->
+        <div class="col-lg-8">
+            <!-- Lecturer + period summary -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="claim-meta-label">Lecturer</div>
+                            <div class="fw-semibold">
+                                @lecturer?.FirstName @lecturer?.LastName
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(lecturer?.Email))
+                            {
+                                <div class="text-muted small">@lecturer.Email</div>
+                            }
+                        </div>
+                        <div class="col-md-3">
+                            <div class="claim-meta-label">Period</div>
+                            <div>@Model.MonthKey</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="claim-meta-label">Hours</div>
+                            <div>@Model.Hours.ToString("0.0") hrs</div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                    {
+                        <hr />
+                        <div class="claim-meta-label mb-1">Lecturer notes</div>
+                        <p class="mb-0 small text-muted">@Model.Notes</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ManagerRemark))
+                    {
+                        <hr />
+                        <div class="claim-meta-label mb-1">Previous internal remark</div>
+                        <p class="mb-0 small text-muted">@Model.ManagerRemark</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Calendar + per-day breakdown (read-only) -->
+            <div class="calendar-card mb-3">
+                <div class="p-3 pb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-uppercase text-muted small fw-semibold">Work calendar</div>
+                        <h5 class="mb-0">Days & hours (read-only)</h5>
+                        <div class="text-muted small">
+                            This view is for verification only. You cannot edit the lecturer’s hours here.
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-light text-muted border">
+                            Month @Model.MonthKey
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Weekday header -->
+                <div class="calendar-header">
+                    <div class="weekday">Sun</div>
+                    <div class="weekday">Mon</div>
+                    <div class="weekday">Tue</div>
+                    <div class="weekday">Wed</div>
+                    <div class="weekday">Thu</div>
+                    <div class="weekday">Fri</div>
+                    <div class="weekday">Sat</div>
+                </div>
+
+                <!-- Calendar grid -->
+                <div id="calendar" class="calendar-grid"></div>
+
+                <div class="px-3 pb-3">
+                    <div id="noEntriesMessage" class="alert alert-light border small mb-2" style="display:none;">
+                        No per-day breakdown captured for this claim. Total hours for @Model.MonthKey:
+                        <strong>@Model.Hours.ToString("0.0") hrs</strong>.
+                    </div>
+
+                    <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
+                        <table class="table table-sm align-middle mb-0" id="entriesTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th class="text-end">Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Filled via JS if entries are available -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="border-top pt-2 mt-2 d-flex justify-content-between small text-muted">
+                        <span>Total from entries (if available)</span>
+                        <span id="totalHoursFromEntries">0.0 hrs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supporting documents -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <div class="claim-meta-label mb-1">Supporting documents</div>
+                            <p class="small text-muted mb-0">
+                                These were uploaded by the lecturer for this claim.
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (Model.Documents != null && Model.Documents.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var doc in Model.Documents)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="me-2">
+                                        <div class="fw-semibold small">@doc.FileName</div>
+                                        <div class="text-muted small">
+                                            Uploaded @doc.UploadedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+                                        </div>
+                                    </div>
+                                    <a asp-controller="Documents"
+                                       asp-action="DownloadDocument"
+                                       asp-route-id="@doc.Id"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        Download
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light border small mb-0">
+                            No supporting documents were uploaded for this claim.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Decision panel -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm decision-card mb-3">
+                <div class="card-body">
+                    <div class="claim-meta-label mb-1">Coordinator decision</div>
+                    <p class="small text-muted">
+                        Add an optional remark for the Academic Manager or a reason if you reject.
+                    </p>
+
+                    <!-- Verify (happy path) -->
+                    <form asp-action="Verify" asp-route-id="@Model.Id" method="post" class="mb-3">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-2">
+                            <label for="verify-remark" class="form-label small fw-semibold">
+                                Remark to Academic Manager (optional)
+                            </label>
+                            <textarea id="verify-remark" name="remark" class="form-control" rows="2"
+                                      placeholder="E.g. 'Hours match timetable. Ready for approval.'"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            Verify &amp; send to Academic Manager
+                        </button>
+                    </form>
+
+                    <hr />
+
+                    <!-- Reject -->
+                    <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-2">
+                            <label for="reject-remark" class="form-label small fw-semibold">
+                                Reason for rejection
+                            </label>
+                            <textarea id="reject-remark" name="remark" class="form-control" rows="2"
+                                      placeholder="E.g. 'Hours exceed agreed maximum for this month.'"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            Reject claim
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-info small">
+                <strong>Note:</strong> This view intentionally hides the lecturer’s hourly
+                rate and total payable amount. Coordinators verify hours and documentation only.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ===== Read-only calendar + entries visualisation =====
+
+        // MonthKey from the model, format "YYYY-MM"
+        const monthKey = '@Model.MonthKey';
+        const totalHoursModel = parseFloat('@Model.Hours');
+
+        // If you later persist per-day entries, you can serialise them from C# as JSON into this ViewBag:
+        // ViewBag.WorkEntriesJson = JsonSerializer.Serialize(entriesList);
+        // and they will automatically show up here.
+        const entries = @Html.Raw(ViewBag.WorkEntriesJson ?? "[]");
+
+        const calendarEl = document.getElementById('calendar');
+        const entriesTableBody = document.querySelector('#entriesTable tbody');
+        const totalHoursFromEntriesEl = document.getElementById('totalHoursFromEntries');
+        const noEntriesMessageEl = document.getElementById('noEntriesMessage');
+
+        function ymdToDate(ymd) {
+            const parts = ymd.split('-').map(Number);
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+
+        function getDayLabel(date) {
+            return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        function computeHoursForEntry(entry) {
+            if (!entry.start || !entry.end) return 0;
+            const [sh, sm] = entry.start.split(':').map(Number);
+            const [eh, em] = entry.end.split(':').map(Number);
+
+            const startDate = new Date(0, 0, 1, sh, sm);
+            const endDate = new Date(0, 0, 1, eh, em);
+            let diff = (endDate - startDate) / 3600000; // ms to hours
+
+            if (diff < 0) diff = 0;
+            return diff;
+        }
+
+        function rebuildCalendar() {
+            if (!calendarEl) return;
+
+            const mk = (monthKey || '').trim();
+            const match = mk.match(/^(\d{4})-(\d{2})$/);
+            if (!match) {
+                calendarEl.innerHTML = '<div class="text-muted small p-3">Invalid month key.</div>';
+                return;
+            }
+
+            const year = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10) - 1; // zero-based
+
+            const firstOfMonth = new Date(year, month, 1);
+            const startDayOfWeek = firstOfMonth.getDay(); // 0=Sun
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            calendarEl.innerHTML = '';
+
+            const today = new Date();
+            const todayY = today.getFullYear();
+            const todayM = today.getMonth();
+            const todayD = today.getDate();
+
+            const dayEntryMap = {};
+            for (const e of entries || []) {
+                if (!e.date) continue;
+                dayEntryMap[e.date] = dayEntryMap[e.date] || [];
+                dayEntryMap[e.date].push(e);
+            }
+
+            const totalCells = Math.ceil((startDayOfWeek + daysInMonth) / 7) * 7;
+            for (let cellIndex = 0; cellIndex < totalCells; cellIndex++) {
+                const cell = document.createElement('div');
+                cell.className = 'day-cell';
+
+                const dayNumber = document.createElement('span');
+                dayNumber.className = 'day-number';
+
+                const timeInfo = document.createElement('div');
+                timeInfo.className = 'day-time';
+
+                const pill = document.createElement('span');
+                pill.className = 'status-pill badge badge-light';
+
+                if (cellIndex < startDayOfWeek || cellIndex >= startDayOfWeek + daysInMonth) {
+                    cell.classList.add('empty');
+                    calendarEl.appendChild(cell);
+                    continue;
+                }
+
+                const day = cellIndex - startDayOfWeek + 1;
+                const date = new Date(year, month, day);
+                const ymd = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                dayNumber.textContent = day;
+
+                if (year === todayY && month === todayM && day === todayD) {
+                    dayNumber.classList.add('badge-today');
+                }
+
+                const dayEntries = dayEntryMap[ymd] || [];
+                let hoursForDay = 0;
+                for (const e of dayEntries) {
+                    hoursForDay += computeHoursForEntry(e);
+                }
+
+                if (hoursForDay > 0) {
+                    dayNumber.classList.add('badge-success');
+                    timeInfo.innerHTML = `<strong>${hoursForDay.toFixed(1)}</strong> hrs`;
+                } else {
+                    timeInfo.innerHTML = '<span class="text-muted small">No hours</span>';
+                }
+
+                let pillText = 'No hours';
+                let pillClass = 'badge-light';
+                if (hoursForDay === 0) {
+                    pillText = 'No hours';
+                    pillClass = 'badge-light';
+                } else if (hoursForDay < 4) {
+                    pillText = 'Short day';
+                    pillClass = 'badge-warning';
+                } else if (hoursForDay <= 8) {
+                    pillText = 'Full day';
+                    pillClass = 'badge-success';
+                } else {
+                    pillText = 'Over 8 hrs';
+                    pillClass = 'badge-danger';
+                }
+
+                pill.textContent = pillText;
+                pill.className = 'status-pill badge ' + pillClass;
+
+                const dayNote = document.createElement('div');
+                dayNote.className = 'day-note';
+                dayNote.textContent = getDayLabel(date);
+
+                cell.appendChild(dayNumber);
+                cell.appendChild(timeInfo);
+                cell.appendChild(pill);
+                cell.appendChild(dayNote);
+
+                calendarEl.appendChild(cell);
+            }
+        }
+
+        function rebuildEntriesTable() {
+            if (!entriesTableBody) return;
+            entriesTableBody.innerHTML = '';
+
+            const list = Array.isArray(entries) ? entries : [];
+            if (!list.length) {
+                totalHoursFromEntriesEl.textContent = totalHoursModel.toFixed(1) + ' hrs';
+                if (noEntriesMessageEl) {
+                    noEntriesMessageEl.style.display = 'block';
+                }
+                return;
+            }
+
+            if (noEntriesMessageEl) {
+                noEntriesMessageEl.style.display = 'none';
+            }
+
+            const sorted = [...list].sort((a, b) => {
+                const da = ymdToDate(a.date).getTime();
+                const db = ymdToDate(b.date).getTime();
+                return da - db;
+            });
+
+            let total = 0;
+
+            for (const e of sorted) {
+                const tr = document.createElement('tr');
+
+                const dateTd = document.createElement('td');
+                dateTd.textContent = e.date;
+
+                const startTd = document.createElement('td');
+                startTd.textContent = e.start || '-';
+
+                const endTd = document.createElement('td');
+                endTd.textContent = e.end || '-';
+
+                const hoursTd = document.createElement('td');
+                hoursTd.className = 'text-end';
+                const hrs = computeHoursForEntry(e);
+                total += hrs;
+                hoursTd.textContent = hrs.toFixed(1);
+
+                tr.appendChild(dateTd);
+                tr.appendChild(startTd);
+                tr.appendChild(endTd);
+                tr.appendChild(hoursTd);
+
+                entriesTableBody.appendChild(tr);
+            }
+
+            totalHoursFromEntriesEl.textContent = total.toFixed(1) + ' hrs';
+        }
+
+        rebuildCalendar();
+        rebuildEntriesTable();
+    </script>
+}

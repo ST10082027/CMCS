@@ -1,6 +1,10 @@
-﻿@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authorization
-@using System.Security.Claims
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    var userId = Context.Session.GetString("UserId");
+    var role = Context.Session.GetString("UserRole");
+    var loggedIn = !string.IsNullOrEmpty(userId);
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,116 +13,161 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CMCS</title>
-    <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/CMCS.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
-                <!-- Dynamic brand link -->
-                @if (User?.Identity?.IsAuthenticated ?? false)
-                {
-                    if (User.IsInRole("IC"))
-                    {
-                        <a class="navbar-brand" asp-controller="ICDashboard" asp-action="Index">CMCS</a>
-                    }
-                    else if (User.IsInRole("MR"))
-                    {
-                        <a class="navbar-brand" asp-controller="MRDashboard" asp-action="Index">CMCS</a>
-                    }
-                    else if (User.IsInRole("CO"))
-                    {
-                        <a class="navbar-brand" asp-controller="CODashboard" asp-action="Index">CMCS</a>
-                    }
-                    else
-                    {
-                        <a class="navbar-brand" asp-controller="Home" asp-action="Index">CMCS</a>
-                    }
-                }
-                else
-                {
-                    <a class="navbar-brand" asp-controller="Account" asp-action="Login">CMCS</a>
-                }
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <!-- Branding -->
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                    CMCS
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    @if (User?.Identity?.IsAuthenticated ?? false)
-                    {
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <!-- Dashboards -->
-                            @if (User.IsInRole("IC"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="ICDashboard" asp-action="Index">IC Dashboard</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Claims" asp-action="My">My Claims</a>
-                                </li>
-                            }
-                            @if (User.IsInRole("MR"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="MRDashboard" asp-action="Index">MR Dashboard</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Claims" asp-action="ReviewQueue">Review Queue</a>
-                                </li>
-                            }
-                            @if (User.IsInRole("CO"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="CODashboard" asp-action="Index">Dashboard</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="CorporateUsers" asp-action="Index">User Management</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Claims" asp-action="All">Review Claims</a>
-                                </li>
-                            }
+                <!-- Navigation -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                        </ul>
-
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex">
-                            <button type="submit" class="btn btn-outline-danger">Logout</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <ul class="navbar-nav me-auto">
+                        <!-- LECTURER -->
+                        @if (role == "Lecturer")
+                        {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link" asp-controller="LecturerDashboard" asp-action="Index">
+                                    Lecturer Dashboard
+                                </a>
                             </li>
-                        </ul>
-                    }
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Claims" asp-action="My">
+                                    My Claims
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Claims" asp-action="New">
+                                    Submit Claim
+                                </a>
+                            </li>
+                        }
+
+                        <!-- PROGRAMME COORDINATOR -->
+                        @if (role == "Coordinator")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ProgrammeCoordinatorDashboard" asp-action="Index">
+                                    Programme Coordinator Dashboard
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ClaimsReview" asp-action="Queue">
+                                    Claims to Verify
+                                </a>
+                            </li>
+                        }
+
+                        <!-- ACADEMIC MANAGER -->
+                        @if (role == "AcademicManager")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="AcademicManagerDashboard" asp-action="Index">
+                                    Academic Manager Dashboard
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ClaimsApproval" asp-action="Queue">
+                                    Review Queue
+                                </a>
+                            </li>
+                        }
+
+
+                        <!-- HUMAN RESOURCES -->
+                        @if (role == "HR")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="HRDashboard" asp-action="Index">
+                                    HR Dashboard
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="HRManageUsers" asp-action="Index">
+                                    Manage Users
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="HRClaims" asp-action="All">
+                                    Claims Overview
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="HRClaims" asp-action="Report">
+                                    Claims Report
+                                </a>
+                            </li>
+
+                        }
+
+                    </ul>
+
+                    <!-- Right-side login/logout -->
+                    <ul class="navbar-nav">
+                        @if (loggedIn)
+                        {
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="nav-link btn btn-link text-light p-0 m-0 align-baseline">
+                                        Logout
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Account" asp-action="Login">
+                                    Login
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container">
+    <!-- Main body -->
+    <div class="container mt-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            2025 - CMCS - ST10082027
+    <footer class="border-top footer text-muted mt-5">
+        <div class="container text-center py-3">
+            &copy; @DateTime.Now.Year - CMCS
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

@@ -16,6 +16,7 @@ dotnet dev-certs https --trust
 2. RESET THE DATABASE (optional but recommended)
 If you are setting up for the first time or starting fresh, run the following commands in the terminal of the 
 project directory:
+0. rm -f cmcs.db cmcs.db-shm cmcs.db-wal
 a. rm -rf Migrations
 b. dotnet ef migrations add Initial
 c. dotnet ef database drop -f
@@ -39,21 +40,25 @@ g. https://localhost:5266
 =============================================================================================================
 SEEDED LOGIN DETAILS
 =============================================================================================================
-Role: Independent Contractor
-Email: ic@example.com
+Role: Lecturer
+Email: lecturer@example.com 
 Password: P@ssw0rd!
-Dashboard URL: .../ICDashboard
+Dashboard URL: .../
 
-Role: Manager
-Email: mr@example.com
+Role: Programme Coordinator
+Email: coordinator@example.com
 Password: P@ssw0rd!
-Dashboard URL: .../MRDashboard
+Dashboard URL: .../
 
-Role: Corporate Officer
-Email: co@example.com
+Role: Academic Manager
+Email: manager@example.com
 Password: P@ssw0rd!
-Dashboard URL: .../CODashboard
+Dashboard URL: .../
 
+Role: Human Resources
+Email: hr@example.com
+Password: P@ssw0rd!
+Dashboard URL: .../  
 =============================================================================================================
 ABOUT FILE UPLOADS
 =============================================================================================================
@@ -105,15 +110,7 @@ Dev Terminal commands
 #2. Commit with a custom message: "git commit -m "custom message"".
 #3. Push to main GitHub repo: "git push origin main"
 
-Dev updates
-2025.10.21-Tuesday-14:03
-Try the end-to-end flow
-1. Login as IC ic@example.com / P@ssw0rd!
-2. Go to My Claims → New Claim → Save (Draft) → Submit
-3. Logout → Login as MR mr@example.com / P@ssw0rd!
-4. Go to Review Queue → Approve or Reject (with remark)
-5. Login as CO co@example.com
-6. Go to All Claims and see everything, with statuses.
+
 !@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
 !@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
 !@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&

@@ -1,0 +1,243 @@
+@using CMCS.Models
+@model IEnumerable<MonthlyClaim>
+
+@{
+    ViewData["Title"] = "Claims Report";
+
+    var selectedMonth = ViewBag.SelectedMonth as string;
+    var selectedStatus = ViewBag.SelectedStatus as string;
+    var monthOptions = ViewBag.MonthOptions as IEnumerable<string> ?? Enumerable.Empty<string>();
+    var statusOptions = ViewBag.StatusOptions as IEnumerable<string> ?? Enum.GetNames(typeof(ClaimStatus));
+
+    decimal totalHours = Model.Sum(c => c.Hours);
+    decimal totalAmount = Model.Sum(c => c.Hours * c.Rate); // safe fallback if Amount is computed
+}
+
+<div class="container mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3">
+        <div>
+            <h2 class="mb-1">Claims Report</h2>
+            <p class="text-muted mb-0">
+                Automatic summary of claims for payment processing. Filters apply instantly.
+            </p>
+        </div>
+
+        <form asp-controller="HRClaims" asp-action="Report" method="get" class="row g-2 mt-3 mt-md-0">
+            <div class="col-auto">
+                <label for="monthKey" class="form-label small mb-0">Month</label>
+                <select class="form-select form-select-sm" id="monthKey" name="monthKey">
+                    <option value="">All months</option>
+                    @foreach (var m in monthOptions)
+                    {
+                        <option value="@m" selected="@(m == selectedMonth ? "selected" : null)">
+                            @m
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-auto">
+                <label for="statusFilter" class="form-label small mb-0">Status</label>
+                <select class="form-select form-select-sm" id="statusFilter" name="statusFilter">
+                    <option value="">Approved only</option>
+                    @foreach (var s in statusOptions)
+                    {
+                        <option value="@s" selected="@(s == selectedStatus ? "selected" : null)">
+                            @s
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-auto align-self-end">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    Generate report
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted small mb-1">Total Claims</h6>
+                    <p class="h4 mb-0">@Model.Count()</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted small mb-1">Total Hours</h6>
+                    <p class="h4 mb-0">@totalHours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted small mb-1">Total Amount (R)</h6>
+                    <p class="h4 mb-0">@totalAmount.ToString("0.00")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed report table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <p class="text-muted mb-0">
+                    No claims found for the selected filters.
+                </p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Claim #</th>
+                                <th>Lecturer</th>
+                                <th>Lecturer Email</th>
+                                <th>Role</th>
+                                <th>Month</th>
+                                <th class="text-end">Hours</th>
+                                <th class="text-end">Rate (R/hr)</th>
+                                <th class="text-end">Amount (R)</th>
+                                <th>Status</th>
+
+                                <!-- Approval / rejection flow -->
+                                <th>Created</th>
+                                <th>Submitted</th>
+                                <th>Verified</th>
+                                <th>Approved</th>
+                                <th>Rejected</th>
+                                <th>Coordinator</th>
+                                <th>Manager Remark</th>
+
+                                <!-- Supporting docs -->
+                                <th>Documents</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                var lecturer = c.IcUser;
+                                var coordinator = c.CoordinatorUser;
+                                var amount = c.Hours * c.Rate;
+
+                                <tr>
+                                    <td>@c.Id</td>
+
+                                    <!-- Lecturer details -->
+                                    <td>
+                                        @if (lecturer != null)
+                                        {
+                                            <div class="fw-semibold">@lecturer.FullName</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Unknown</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (lecturer != null)
+                                        {
+                                            @lecturer.Email
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (lecturer != null)
+                                        {
+                                            @lecturer.Role
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+
+                                    <!-- Claim core details -->
+                                    <td>@c.MonthKey</td>
+                                    <td class="text-end">@c.Hours</td>
+                                    <td class="text-end">@c.Rate.ToString("0.00")</td>
+                                    <td class="text-end">@amount.ToString("0.00")</td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            @c.Status
+                                        </span>
+                                    </td>
+
+                                    <!-- Approval / rejection flow timeline -->
+                                    <td>@c.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>
+                                        @(c.SubmittedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")
+                                    </td>
+                                    <td>
+                                        @(c.VerifiedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")
+                                    </td>
+                                    <td>
+                                        @(c.ApprovedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")
+                                    </td>
+                                    <td>
+                                        @(c.RejectedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")
+                                    </td>
+                                    <td>
+                                        @if (coordinator != null)
+                                        {
+                                            @coordinator.FullName
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(c.ManagerRemark))
+                                        {
+                                            <span>@c.ManagerRemark</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">None</span>
+                                        }
+                                    </td>
+
+                                    <!-- Attachments -->
+                                    <td>
+                                        @if (c.Documents != null && c.Documents.Any())
+                                        {
+                                            <div class="small">
+                                                <span class="badge bg-success">
+                                                    @c.Documents.Count() document(s)
+                                                </span>
+                                                <ul class="list-unstyled mb-0 mt-1">
+                                                    @foreach (var d in c.Documents)
+                                                    {
+                                                        <li>@d.FileName</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No docs</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
