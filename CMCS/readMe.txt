@@ -1,23 +1,32 @@
 =============================================================================================================
 CMCS - Contract Monthly Claim System
 =============================================================================================================
+
+Please read through this entire document dilligently.
+
 Welcome to CMCS.
-This is a .NET Core MVC web application built to help Independent Contractors (ICs) submit monthly claims,
-Managers (MRs) review and approve them, and Corporate Officers (COs) manage approvals and users.
-Each user type has their own secure dashboard and access level. hehe 
+
+This is a .NET Core Model-View-Controller Web Application built to help Lecturers submit monthly claims. 
+Those claims are reviewed by Programme Coordinators, after which they are sent to Academic Managers for 
+further review. Finally Human Resources manage approvals and manage users. Each user type has their own
+secure dashboard and access level. The dashboards are designed in such a way to be intuitive. The users
+should have no problem navigating the web-application. 
+
+Download from GitHub:
+https://github.com/ST10082027/CMCS
 
 =============================================================================================================
 BASIC SETUP
 =============================================================================================================
-0. OPEN THE PROJECT IN VS CODE
+OPEN THE PROJECT IN VS CODE
 The project should be opened in VS Code...
 ...
 
-1. TRUST THE LOCAL HTTPS CERTIFICATE
+TRUST THE LOCAL HTTPS CERTIFICATE
 Run this command in the terminal of the project directory:
 dotnet dev-certs https --trust
 
-2. RUNNING FOR THE FIRST TIME 
+RUNNING FOR THE FIRST TIME 
 If you are setting up for the first time or starting fresh, proceed with the steps outlined below.
 If you have done these steps before, proceed to 'BUILD AND RUN'
 
@@ -43,6 +52,7 @@ dotnet ef migrations add Initial
 Update the database to seed users (if first time...)
 Run the following command in the terminal of the project directory '/CMCS':
 dotnet ef database update
+
 
 =============================================================================================================
 BUILD AND RUN
@@ -74,6 +84,7 @@ Once it’s running, open your browser and go to:
 or https://localhost:5001
 or http://localhost:5000
 
+
 =============================================================================================================
 SEEDED LOGIN DETAILS
 =============================================================================================================
@@ -92,6 +103,8 @@ Password: P@ssw0rd!
 Role: Human Resources
 Email: hr@example.com
 Password: P@ssw0rd!  
+
+
 =============================================================================================================
 ABOUT FILE UPLOADS
 =============================================================================================================
@@ -100,16 +113,17 @@ This is optional but allows files such as: PDF, PNG, JPG, DOCX, XLSX, CSV and TX
 Uploaded files are stored under:
 Academic Managers and Human Resources can view and download these files.
 
+
 =============================================================================================================
 NOTES
 =============================================================================================================
 If you encounter migration issues, run the setup commands again from the top.
 This project was created for educational purposes as part of the PROG6212 Portfolio of Evidence.
 
+
 =============================================================================================================
 LECTURER FEEDBACK |  PART 2 - - - > PART 3
 =============================================================================================================
-
 Feedback quote:
 "Your program does not actually distinguish the different roles between Coordinator and Manager.
 Please read the POE's instructions for Part 3 and adjust accordingly."
