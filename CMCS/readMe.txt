@@ -169,4 +169,38 @@ The entire application has been reorganised. Everything from the code, folders, 
 to follow a cleaner structure with intuitive navigation based on user roles. Views are grouped logically, 
 labels have been refined, front-end reworked, backend organised and the workflow has been simplified. This was
 done to support the end user with minimal confusion. Hopefully this improves readability, system wide!
+
+=============================================================================================================
+UNIT TESTING
+=============================================================================================================
+--Step 0--
+Open terminal and navigate to the correct location.
+Run the following command in the terminal of the project directory '/CMCS':
+cd CMCS.Tests
+
+--Step 1--
+Restore dependancies of CMCS 
+Run the following command in the terminal of the project directory '/CMCS/CMCS.Tests':
+dotnet restore
+
+--Step 2--
+Remove the output files generated during a previous build.
+Run the following command in the terminal of the project directory '/CMCS/CMCS.Tests':
+dotnet clean
+
+--Step 3--
+Build the solution and all of its dependencies.
+Run the following command in the terminal of the project directory '/CMCS/CMCS.Tests':
+dotnet build
+
+--Step 4--
+Finally run this command to execute unit tests in the .NET test driver.
+Run the following command in the terminal of the project directory '/CMCS/CMCS.Tests':
+dotnet test
+
+--Step 5-- 
+Review output.
+
+=============================================================================================================
 END OF FILE
+=============================================================================================================

@@ -20,11 +20,11 @@ namespace CMCS.Controllers.ProgrammeCoordinatorControllers
         public async Task<IActionResult> Queue()
         {
             var list = await _db.MonthlyClaims
-    .Include(c => c.Documents)
-    .Include(c => c.IcUser) // <- this is the navigation property
-    .Where(c => c.Status == ClaimStatus.Pending)
-    .OrderByDescending(c => c.SubmittedAt)
-    .ToListAsync();
+            .Include(c => c.Documents)
+            .Include(c => c.IcUser) // <- this is the navigation property
+            .Where(c => c.Status == ClaimStatus.Pending)
+            .OrderByDescending(c => c.SubmittedAt)
+            .ToListAsync();
 
             // and also point to the correct view file:
             return View("~/Views/ProgrammeCoordinatorViews/CoordinatorReviewQueue.cshtml", list);
@@ -34,9 +34,9 @@ namespace CMCS.Controllers.ProgrammeCoordinatorControllers
         public async Task<IActionResult> Review(int id)
         {
             var claim = await _db.MonthlyClaims
-    .Include(c => c.Documents)
-    .Include(c => c.IcUser)
-    .FirstOrDefaultAsync(c => c.Id == id);
+            .Include(c => c.Documents)
+            .Include(c => c.IcUser)
+            .FirstOrDefaultAsync(c => c.Id == id);
 
 
             if (claim == null)

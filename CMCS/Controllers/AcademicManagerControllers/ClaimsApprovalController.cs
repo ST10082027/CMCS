@@ -54,7 +54,6 @@ namespace CMCS.Controllers.AcademicManagerControllers
                 return RedirectToAction(nameof(Queue));
             }
 
-            // IMPORTANT: do NOT change IcUserId here – that must stay the lecturer's ID.
             claim.Status = ClaimStatus.ApprovedByManager;
             claim.ManagerRemark = "Approved by Academic Manager.";
             claim.ApprovedAt = DateTime.UtcNow;
