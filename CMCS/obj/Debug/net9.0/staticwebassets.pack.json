@@ -273,12 +273,20 @@
       "PackagePath": "staticwebassets/uploads/claims/2/e0b91f29c1c1440b972057b62145d302.png"
     },
     {
+      "Id": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/3/d7a97df323854026a4575860dddefec5.png",
+      "PackagePath": "staticwebassets/uploads/claims/3/d7a97df323854026a4575860dddefec5.png"
+    },
+    {
       "Id": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/3/e346bee95d03470ba932a407fade8ec0.png",
       "PackagePath": "staticwebassets/uploads/claims/3/e346bee95d03470ba932a407fade8ec0.png"
     },
     {
       "Id": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/4/6b52b4f46ef34e159138310072af46f5.png",
       "PackagePath": "staticwebassets/uploads/claims/4/6b52b4f46ef34e159138310072af46f5.png"
+    },
+    {
+      "Id": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.png",
+      "PackagePath": "staticwebassets/uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.png"
     },
     {
       "Id": "obj/Debug/net9.0/staticwebassets/msbuild.CMCS.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "KO76ONrt9YaCRq92mjNGfIPPa/i/I3Bnl7eCjd99wL8=",
+  "Hash": "xsUbf51J7VW/0Y8F68Fqq5a4bWn5Wu75gf0820zqUnU=",
   "Source": "CMCS",
   "BasePath": "_content/CMCS",
   "Mode": "Default",
@@ -2810,6 +2810,27 @@
       "OriginalItemSpec": "wwwroot/uploads/claims/2/e0b91f29c1c1440b972057b62145d302.png"
     },
     {
+      "Identity": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/3/d7a97df323854026a4575860dddefec5.png",
+      "SourceId": "CMCS",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/",
+      "BasePath": "_content/CMCS",
+      "RelativePath": "uploads/claims/3/d7a97df323854026a4575860dddefec5#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "05r0dzcfwy",
+      "Integrity": "ZKK0pRH0Y4gcORVhEKLMNfJdyJSutUrTy0XwFoJfaf0=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/claims/3/d7a97df323854026a4575860dddefec5.png"
+    },
+    {
       "Identity": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/3/e346bee95d03470ba932a407fade8ec0.png",
       "SourceId": "CMCS",
       "SourceType": "Discovered",
@@ -2850,6 +2871,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/uploads/claims/4/6b52b4f46ef34e159138310072af46f5.png"
+    },
+    {
+      "Identity": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.png",
+      "SourceId": "CMCS",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/",
+      "BasePath": "_content/CMCS",
+      "RelativePath": "uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "yvv5fnam8k",
+      "Integrity": "UoSOQp/nKQrN7SJ8CZdpTjE1yAjl0pCDWF/qTOzaOa0=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.png"
     }
   ],
   "Endpoints": [
@@ -2878,7 +2920,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2931,7 +2973,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -2968,7 +3010,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3015,7 +3057,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3068,7 +3110,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3105,7 +3147,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3152,7 +3194,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3213,7 +3255,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3258,7 +3300,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3313,7 +3355,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3374,7 +3416,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -3419,7 +3461,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 21 Nov 2025 16:18:37 GMT"
+          "Value": "Fri, 21 Nov 2025 16:37:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -22336,6 +22378,88 @@
       ]
     },
     {
+      "Route": "uploads/claims/3/d7a97df323854026a4575860dddefec5.05r0dzcfwy.png",
+      "AssetFile": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/3/d7a97df323854026a4575860dddefec5.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "237268"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ZKK0pRH0Y4gcORVhEKLMNfJdyJSutUrTy0XwFoJfaf0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 21 Nov 2025 17:01:00 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "05r0dzcfwy"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/claims/3/d7a97df323854026a4575860dddefec5.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ZKK0pRH0Y4gcORVhEKLMNfJdyJSutUrTy0XwFoJfaf0="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/claims/3/d7a97df323854026a4575860dddefec5.png",
+      "AssetFile": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/3/d7a97df323854026a4575860dddefec5.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "237268"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ZKK0pRH0Y4gcORVhEKLMNfJdyJSutUrTy0XwFoJfaf0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 21 Nov 2025 17:01:00 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ZKK0pRH0Y4gcORVhEKLMNfJdyJSutUrTy0XwFoJfaf0="
+        }
+      ]
+    },
+    {
       "Route": "uploads/claims/3/e346bee95d03470ba932a407fade8ec0.7thzvz1hes.png",
       "AssetFile": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/3/e346bee95d03470ba932a407fade8ec0.png",
       "Selectors": [],
@@ -22496,6 +22620,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-Nc/QEvPfZ7dS4/9orQZZv3LiZBiK4W+Ij92HTU2nzSQ="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.png",
+      "AssetFile": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "275952"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"UoSOQp/nKQrN7SJ8CZdpTjE1yAjl0pCDWF/qTOzaOa0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 21 Nov 2025 17:03:11 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-UoSOQp/nKQrN7SJ8CZdpTjE1yAjl0pCDWF/qTOzaOa0="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.yvv5fnam8k.png",
+      "AssetFile": "/Users/johnhoffmanprinsloo/CMCS/CMCS/wwwroot/uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "275952"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"UoSOQp/nKQrN7SJ8CZdpTjE1yAjl0pCDWF/qTOzaOa0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 21 Nov 2025 17:03:11 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "yvv5fnam8k"
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/claims/4/a1bab2a4ba074007ba54638b3bb0828c.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-UoSOQp/nKQrN7SJ8CZdpTjE1yAjl0pCDWF/qTOzaOa0="
         }
       ]
     }
