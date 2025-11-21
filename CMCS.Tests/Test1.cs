@@ -35,6 +35,7 @@ namespace CMCS.Tests
         }
 
         // 1
+        /*This test checks that when the system generates a month key for a single-digit month, it correctly adds a leading zero (e.g., “2025-03”) to meet the required YYYY-MM format.*/
         [TestMethod]
         public void BuildMonthKey_SingleDigitMonth_IsZeroPadded()
         {
@@ -46,6 +47,7 @@ namespace CMCS.Tests
         }
 
         // 2
+        /*This test ensures that when the month already has two digits (e.g., 11), the method still produces a correctly formatted month key in the standard YYYY-MM pattern.*/
         [TestMethod]
         public void BuildMonthKey_TwoDigitMonth_IsCorrect()
         {
@@ -54,6 +56,7 @@ namespace CMCS.Tests
         }
 
         // 3
+        /*This test verifies that a new MonthlyClaim object automatically initializes its MonthKey using the correct YYYY-MM format, matching the required pattern via a regular expression.*/
         [TestMethod]
         public void DefaultMonthKey_MatchesYearMonthPattern()
         {
