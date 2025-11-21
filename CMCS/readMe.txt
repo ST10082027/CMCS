@@ -16,10 +16,10 @@ dotnet dev-certs https --trust
 2. RESET THE DATABASE (optional but recommended)
 If you are setting up for the first time or starting fresh, run the following commands in the terminal of the 
 project directory:
-0. rm -f cmcs.db cmcs.db-shm cmcs.db-wal
-a. rm -rf Migrations
-b. dotnet ef migrations add Initial
-c. dotnet ef database drop -f
+0. rm -rf Migrations
+a. dotnet ef database drop -f
+b. rm -f *.db
+c. dotnet ef migrations add Initial
 d. dotnet ef database update
 This will clear out old migrations and rebuild the database.
 
@@ -64,7 +64,7 @@ ABOUT FILE UPLOADS
 =============================================================================================================
 Independent Contractors can attach supporting documents when submitting claims.
 This is optional but allows files such as:
-PDF, PNG, JPG, DOCX, XLSX, CSV and TXT. Each file can be up to 20 MB.
+PDF, PNG, JPG, DOCX, XLSX, CSV and TXT. 
 Uploaded files are stored under: wwwroot/uploads/claims/[ClaimId]
 Managers and Corporate Officers can view and download these files.
 
@@ -101,9 +101,20 @@ END OF FILE
 !@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&!@#%$^%&^*&*^%$#@!#$#$%^%&^*&&^%$^&*&^%$#@!@#$%^&
 Devs notes
 
+Terminal
+rm -rf Migrations
+rm -f *.db
 dotnet ef migrations add InitIdentity
 dotnet ef database update
 dotnet dev-certs https --trust
+
+GitHub
+git add .
+git commit -m "xXx"
+git commit -m "This commit added the completed final system design, including the defined roles of Lecturer, Programme Coordinator, Academic Manager and HR.
+All mandatory technical requirements had been implemented, including using Sessions for authentication and authorisation, opening directly to a login page with no registration, ensuring HR created all user accounts, and restricting every GET request according to the user’s role stored in Session.
+Features such as HR-provided rate data, coordinators role and responsibilities addition, managers approval refinement and HR finalised and generated reports.  Enforced validation such as the 180-hour rule. Claim status tracking implemented. Lecturer automation calculation Swagger API feature added."
+git push
 
 Dev Terminal commands
 #1. Stage changes: "git add .".

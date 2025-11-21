@@ -471,7 +471,7 @@ namespace CMCS.Controllers.LecturerControllers
             }
 
             // Copy validated fields back onto the tracked entity
-            claim.MonthKey = model.MonthKey;
+            claim.MonthKey = model.MonthKey ?? claim.MonthKey;
             claim.Hours = model.Hours;
             claim.Rate = model.Rate;
             claim.Notes = model.Notes;

@@ -60,7 +60,7 @@ else
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var c in Model)
+                        @foreach (var c in (Model ?? Enumerable.Empty<CMCS.Models.MonthlyClaim>()))
                         {
                             <tr>
                                 <td>
@@ -91,19 +91,16 @@ else
                                     @if (c.Documents != null && c.Documents.Any())
                                     {
                                         <div class="dropdown d-inline-block">
-                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                                    type="button"
-                                                    data-bs-toggle="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                                data-bs-toggle="dropdown">
                                                 @c.Documents.Count @((c.Documents.Count == 1) ? "file" : "files")
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end">
                                                 @foreach (var d in c.Documents)
                                                 {
                                                     <li>
-                                                        <a class="dropdown-item"
-                                                           asp-controller="Claims"
-                                                           asp-action="DownloadDocument"
-                                                           asp-route-id="@d.Id">
+                                                        <a class="dropdown-item" asp-controller="Claims" asp-action="DownloadDocument"
+                                                            asp-route-id="@d.Id">
                                                             @d.FileName
                                                         </a>
                                                     </li>
@@ -131,29 +128,19 @@ else
                                 </td>
 
                                 <td class="text-end">
-                                    <form asp-action="Approve"
-                                          asp-route-id="@c.Id"
-                                          method="post"
-                                          class="d-inline">
+                                    <form asp-action="Approve" asp-route-id="@c.Id" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit"
-                                                class="btn btn-sm btn-success me-1">
+                                        <button type="submit" class="btn btn-sm btn-success me-1">
                                             Approve
                                         </button>
                                     </form>
 
-                                    <form asp-action="Reject"
-                                          asp-route-id="@c.Id"
-                                          method="post"
-                                          class="d-inline-flex align-items-center gap-1">
+                                    <form asp-action="Reject" asp-route-id="@c.Id" method="post"
+                                        class="d-inline-flex align-items-center gap-1">
                                         @Html.AntiForgeryToken()
-                                        <input type="text"
-                                               name="remark"
-                                               placeholder="Reason…"
-                                               class="form-control form-control-sm"
-                                               style="max-width: 190px;" />
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-danger">
+                                        <input type="text" name="remark" placeholder="Reason…"
+                                            class="form-control form-control-sm" style="max-width: 190px;" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
                                             Reject
                                         </button>
                                     </form>
