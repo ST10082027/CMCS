@@ -111,9 +111,6 @@ dotnet dev-certs https --trust
 GitHub
 git add .
 git commit -m "xXx"
-git commit -m "This commit added the completed final system design, including the defined roles of Lecturer, Programme Coordinator, Academic Manager and HR.
-All mandatory technical requirements had been implemented, including using Sessions for authentication and authorisation, opening directly to a login page with no registration, ensuring HR created all user accounts, and restricting every GET request according to the user’s role stored in Session.
-Features such as HR-provided rate data, coordinators role and responsibilities addition, managers approval refinement and HR finalised and generated reports.  Enforced validation such as the 180-hour rule. Claim status tracking implemented. Lecturer automation calculation Swagger API feature added."
 git push
 
 Dev Terminal commands
